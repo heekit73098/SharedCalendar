@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Calendar from '@toast-ui/react-calendar';
 import { theme } from './theme';
 import { addDate, addHours, subtractDate } from './utils';
+import axios from 'axios';
 
 type ViewType = 'month' | 'week' | 'day';
 
@@ -31,6 +32,7 @@ function App({ view }: { view: ViewType }) {
   const calendarRef = useRef<typeof Calendar>(null);
   const [selectedDateRangeText, setSelectedDateRangeText] = useState('');
   const [selectedView, setSelectedView] = useState(view);
+  const [events, setEvents] = useState([])
   const initialCalendars: Options['calendars'] = [
     {
       id: '0',
@@ -47,42 +49,19 @@ function App({ view }: { view: ViewType }) {
       dragBackgroundColor: '#00a9ff',
     },
   ];
-  const initialEvents: Partial<EventObject>[] = [
-    {
-      id: '1',
-      calendarId: '0',
-      title: 'TOAST UI Calendar Study',
-      category: 'time',
-      start: today,
-      end: addHours(today, 3),
-    },
-    {
-      id: '2',
-      calendarId: '0',
-      title: 'Practice',
-      category: 'milestone',
-      start: addDate(today, 1),
-      end: addDate(today, 1),
-      isReadOnly: true,
-    },
-    {
-      id: '3',
-      calendarId: '0',
-      title: 'FE Workshop',
-      category: 'allday',
-      start: subtractDate(today, 2),
-      end: subtractDate(today, 1),
-      isReadOnly: true,
-    },
-    {
-      id: '4',
-      calendarId: '0',
-      title: 'Report',
-      category: 'time',
-      start: today,
-      end: addHours(today, 1),
-    },
-  ];
+
+  function refreshList() {
+    axios.get("http://localhost:8000/api/calendar")
+    .then((res)=>{
+      res.data.forEach((event: { start: TZDate; end: TZDate; }) => {
+        event.start = new TZDate(event.start);
+        event.end = new TZDate(event.end);
+      });
+      setEvents(res.data)
+    })
+    .catch((err) => console.log(err));
+  } 
+
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
@@ -137,6 +116,10 @@ function App({ view }: { view: ViewType }) {
   useEffect(() => {
     updateRenderRangeText();
   }, [selectedView, updateRenderRangeText]);
+
+  useEffect(() => {
+    refreshList();
+  }, [])
 
   const onAfterRenderEvent: ExternalEventTypes['afterRenderEvent'] = (res) => {
     console.group('onAfterRenderEvent');
@@ -198,16 +181,18 @@ function App({ view }: { view: ViewType }) {
       id: String(Math.random()),
       title: eventData.title,
       isAllday: eventData.isAllday,
-      start: eventData.start,
-      end: eventData.end,
+      start: eventData.start?.toString(),
+      end: eventData.end?.toString(),
       category: eventData.isAllday ? 'allday' : 'time',
       dueDateClass: '',
       location: eventData.location,
       state: eventData.state,
       isPrivate: eventData.isPrivate,
     };
-
-    getCalInstance().createEvents([event]);
+    axios
+      .post("http://localhost:8000/api/calendar/", event)
+      .then((res) => refreshList());
+    // getCalInstance().createEvents([event]);
   };
 
   return (
@@ -253,15 +238,15 @@ function App({ view }: { view: ViewType }) {
         height="600px"
         calendars={initialCalendars}
         month={{ startDayOfWeek: 1 }}
-        events={initialEvents}
-        template={{
-          milestone(event) {
-            return `<span style="color: #fff; background-color: ${event.backgroundColor};">${event.title}</span>`;
-          },
-          allday(event) {
-            return `[All day] ${event.title}`;
-          },
-        }}
+        events={events}
+        // template={{
+        //   milestone(event) {
+        //     return `<span style="color: #fff; background-color: ${event.backgroundColor};">${event.title}</span>`;
+        //   },
+        //   allday(event) {
+        //     return `[All day] ${event.title}`;
+        //   },
+        // }}
         theme={theme}
         useDetailPopup={true}
         useFormPopup={true}

@@ -1,7 +1,7 @@
 # SharedCalendar 
 **Work in Progress**
 
-Webapp to handle schedule with others
+Webapp to handle social scheduling with others
 
 ## Motivation
 As my schedule gets busier, I would like to keep track of it easily. 
@@ -15,3 +15,23 @@ In particular, I will be practising the Secure Software Development Life Cycle:
 3. Implementation
 4. Testing / Bug Fixing
 5. Maintenance 
+
+### Planning
+Purpose: To create a webapp which allows users to manage their schedules with their partner. 
+
+Users can form groups which they can then add their events to keep everyone up to date.
+The webapp should be secure against common web vulnerabilites, with reference to the OWASP Top 10.
+
+### Architecture & Design
+To emulate a real web application, I will be splitting the development of frontend and backend. 
+
+Tech Stack: ReactJS (Frontend), Django (Backend), Firebase (Hosting w Database)
+
+As such, the languages used is primarily TypeScript and Python.
+
+For DevSecOps, Github Actions will be the primary deliverer. CodeQL is a SAST tool developed by Github and will be used to check vulnerabilities in the code.
+Gitleaks will also be used to ensure that no secrets are leaked on the repo.
+
+### TODO
+1. Implement Delete, Update events
+2. Implement Login and Users

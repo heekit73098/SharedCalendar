@@ -4,7 +4,7 @@ from .models import SharedCalendar
 
 
 class SharedCalendarAdmin(admin.ModelAdmin):
-    list_display = ('title', 'description', 'datetime')
+    list_display = ('calendarId', 'id', 'title', 'isAllday', 'start', 'end', 'category', 'dueDateClass', 'location', 'state', 'isPrivate')
 
 # Register your models here.
 
