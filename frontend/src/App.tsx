@@ -133,8 +133,8 @@ function App({ view }: { view: ViewType }) {
     console.groupEnd();
 
     const { id, calendarId } = res;
-
-    getCalInstance().deleteEvent(id, calendarId);
+    axios.delete("http://localhost:8000/api/calendar/"+ id).then((res) => refreshList());
+    // getCalInstance().deleteEvent(id, calendarId);
   };
 
   const onChangeSelect = (ev: ChangeEvent<HTMLSelectElement>) => {
@@ -171,14 +171,14 @@ function App({ view }: { view: ViewType }) {
 
     const targetEvent = updateData.event;
     const changes = { ...updateData.changes };
-
-    getCalInstance().updateEvent(targetEvent.id, targetEvent.calendarId, changes);
+    axios.patch("http://localhost:8000/api/calendar/" + targetEvent.id + "/", changes).then((res) => refreshList());
+    // getCalInstance().updateEvent(targetEvent.id, targetEvent.calendarId, changes);
   };
 
   const onBeforeCreateEvent: ExternalEventTypes['beforeCreateEvent'] = (eventData) => {
     const event = {
       calendarId: eventData.calendarId || '',
-      id: String(Math.random()),
+      id: "",
       title: eventData.title,
       isAllday: eventData.isAllday,
       start: eventData.start?.toString(),
@@ -189,9 +189,7 @@ function App({ view }: { view: ViewType }) {
       state: eventData.state,
       isPrivate: eventData.isPrivate,
     };
-    axios
-      .post("http://localhost:8000/api/calendar/", event)
-      .then((res) => refreshList());
+    axios.post("http://localhost:8000/api/calendar/", event).then((res) => refreshList());
     // getCalInstance().createEvents([event]);
   };
 

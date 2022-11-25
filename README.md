@@ -33,5 +33,5 @@ For DevSecOps, Github Actions will be the primary deliverer. CodeQL is a SAST to
 Gitleaks will also be used to ensure that no secrets are leaked on the repo.
 
 ### TODO
-1. Implement Delete, Update events
-2. Implement Login and Users
+1. Implement Login and Users
+2. Start writing unittests
