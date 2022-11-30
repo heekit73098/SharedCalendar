@@ -7,12 +7,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import Calendar from '@toast-ui/react-calendar';
 import { theme } from './theme';
-import { addDate, addHours, subtractDate } from './utils';
 import axios from 'axios';
 
 type ViewType = 'month' | 'week' | 'day';
 
-const today = new TZDate();
 const viewModeOptions = [
   {
     title: 'Monthly',
