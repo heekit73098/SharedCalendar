@@ -1,6 +1,8 @@
 from django.db.utils import IntegrityError
-from django.test import TestCase
+from django.test import TestCase, Client
+from django.urls import reverse
 from .models import SharedCalendar
+from .views import SharedCalendarView
 
 # Create your tests here.
 
@@ -42,3 +44,8 @@ class TestEvent(TestCase):
     def test_get_id_success(self):
         event = SharedCalendar.objects.get(id="0")
         self.assertEqual(event.end, "")
+
+class TestView(TestCase):
+    def test_view(self):
+        response = Client().get("/api/calendar/") 
+        self.assertEqual(response.status_code, 200)
