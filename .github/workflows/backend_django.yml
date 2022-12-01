@@ -10,3 +10,5 @@ jobs:
         working-directory: backend/
       - run: python manage.py test
         working-directory: backend/
+        env: 
+          SECRET_KEY: mok+a8@32%td^i391%u3qdeqk0t!4@ho-#pjimfyd43afqd*e9 # Dummy Secret Key
