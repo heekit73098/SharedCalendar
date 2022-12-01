@@ -1,7 +1,6 @@
 import './App.css';
 
-import type { EventObject, ExternalEventTypes, Options } from '@toast-ui/calendar';
-import { TZDate } from '@toast-ui/calendar';
+import type { ExternalEventTypes, Options } from '@toast-ui/calendar';
 import type { ChangeEvent, MouseEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -51,9 +50,9 @@ function App({ view }: { view: ViewType }) {
   function refreshList() {
     axios.get("http://localhost:8000/api/calendar")
     .then((res)=>{
-      res.data.forEach((event: { start: TZDate; end: TZDate; }) => {
-        event.start = new TZDate(event.start);
-        event.end = new TZDate(event.end);
+      res.data.forEach((event: { start: Date; end: Date; }) => {
+        event.start = new Date(event.start);
+        event.end = new Date(event.end);
       });
       setEvents(res.data)
     })
@@ -83,7 +82,7 @@ function App({ view }: { view: ViewType }) {
 
     switch (viewName) {
       case 'month': {
-        dateRangeText = `${year}-${month}`;
+        dateRangeText = `${month}/${year}`;
         break;
       }
       case 'week': {
@@ -93,15 +92,13 @@ function App({ view }: { view: ViewType }) {
         const endMonth = rangeEnd.getMonth() + 1;
         const endDate = rangeEnd.getDate();
 
-        const start = `${year}-${month < 10 ? '0' : ''}${month}-${date < 10 ? '0' : ''}${date}`;
-        const end = `${year}-${endMonth < 10 ? '0' : ''}${endMonth}-${
-          endDate < 10 ? '0' : ''
-        }${endDate}`;
-        dateRangeText = `${start} ~ ${end}`;
+        const start = `${date < 10 ? '0' : ''}${date}/${month < 10 ? '0' : ''}${month}/${year}`;
+        const end = `${endDate < 10 ? '0' : ''}${endDate}/${endMonth < 10 ? '0' : ''}${endMonth}/${year}`;
+        dateRangeText = `${start} - ${end}`;
         break;
       }
       default:
-        dateRangeText = `${year}-${month}-${date}`;
+        dateRangeText = `${date}/${month}/${year}`;
     }
 
     setSelectedDateRangeText(dateRangeText);

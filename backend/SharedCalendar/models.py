@@ -8,12 +8,12 @@ import string
 # Create your models here.
 
 class SharedCalendar(models.Model):
-    calendarId = models.TextField()
+    calendarId = models.TextField(null=False)
     id = models.TextField(primary_key=True, blank=True, unique=True)
-    title = models.TextField()
+    title = models.TextField(null=False)
     isAllday = models.BooleanField()
-    start = models.TextField()
-    end = models.TextField()
+    start = models.TextField(null=False)
+    end = models.TextField(null=False)
     category = models.TextField()
     dueDateClass = models.TextField(blank=True)
     location = models.TextField(blank=True)
