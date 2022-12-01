@@ -4,8 +4,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Change Dir
-        run: cd frontend
       - uses: actions/checkout@v2
       - name: Setup Node.js
         uses: actions/setup-node@v1
@@ -28,8 +26,10 @@ jobs:
 
       # Install required deps for action
       - name: Install Dependencies
+        working-directory: frontend/
         run: npm install
 
       # Finally, run our tests
       - name: Run the tests
+        working-directory: frontend/
         run: npm test
