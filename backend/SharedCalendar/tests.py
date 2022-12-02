@@ -1,8 +1,8 @@
 from django.db.utils import IntegrityError
 from django.test import TestCase, Client
 from django.urls import reverse
-from .models import SharedCalendar
-from .views import SharedCalendarView
+from .models import Event
+from .views import EventView
 
 # Create your tests here.
 
@@ -10,7 +10,7 @@ class TestEvent(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         for i in range(5):
-            SharedCalendar.objects.create(
+            Event.objects.create(
                 calendarId = "0",
                 id = str(i),
                 title = "test" + str(i),
@@ -24,7 +24,7 @@ class TestEvent(TestCase):
     
     def test_create_same_id_failure(self):
         try:
-            SharedCalendar.objects.create(
+            Event.objects.create(
                 calendarId = "0",
                 id = "0",
                 title = "test0",
@@ -42,7 +42,7 @@ class TestEvent(TestCase):
             pass
 
     def test_get_id_success(self):
-        event = SharedCalendar.objects.get(id="0")
+        event = Event.objects.get(id="0")
         self.assertEqual(event.end, "")
 
 class TestView(TestCase):

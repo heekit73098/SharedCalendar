@@ -7,7 +7,7 @@ import string
 
 # Create your models here.
 
-class SharedCalendar(models.Model):
+class Event(models.Model):
     calendarId = models.TextField(null=False)
     id = models.TextField(primary_key=True, blank=True, unique=True)
     title = models.TextField(null=False)
@@ -23,7 +23,7 @@ class SharedCalendar(models.Model):
     def save(self, *args, **kwargs):  
         while not self.id:
             newID = get_random_string(6, allowed_chars=string.ascii_uppercase + string.digits)
-            if not SharedCalendar.objects.filter(pk=newID).exists():
+            if not Event.objects.filter(pk=newID).exists():
                 self.id = newID
 
         super().save(*args, **kwargs)
@@ -31,3 +31,8 @@ class SharedCalendar(models.Model):
 
     def __str__(self) -> str:
         return self.title
+
+class User(models.Model):
+    email = models.TextField(primary_key=True, unique=True)
+    name = models.TextField()
+    saltedPassword = models.TextField()

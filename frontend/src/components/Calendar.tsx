@@ -1,11 +1,11 @@
-import './App.css';
+import '../assets/Calendar.css';
 
 import type { ExternalEventTypes, Options } from '@toast-ui/calendar';
 import type { ChangeEvent, MouseEvent } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import Calendar from '@toast-ui/react-calendar';
-import { theme } from './theme';
+import { theme } from '../utils/theme';
 import axios from 'axios';
 
 type ViewType = 'month' | 'week' | 'day';

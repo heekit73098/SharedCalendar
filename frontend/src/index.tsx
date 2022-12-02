@@ -1,8 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import './assets/index.css';
+import App from './components/Calendar';
+import Login from './components/Login';
+import Register from './components/Register';
+import reportWebVitals from './utils/reportWebVitals';
 import '@toast-ui/calendar/toastui-calendar.css';
 import 'tui-date-picker/dist/tui-date-picker.min.css';
 import 'tui-time-picker/dist/tui-time-picker.min.css';
@@ -10,9 +12,15 @@ import 'tui-time-picker/dist/tui-time-picker.min.css';
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
+// root.render(
+//   <React.StrictMode>
+//     <App view={'month'} />
+//   </React.StrictMode>
+// );
 root.render(
   <React.StrictMode>
-    <App view={'month'} />
+    <Login />
+    <Register />
   </React.StrictMode>
 );
 

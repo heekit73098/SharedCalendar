@@ -19,7 +19,8 @@ from rest_framework import routers
 from SharedCalendar import views
 
 router = routers.DefaultRouter()
-router.register(r'calendar', views.SharedCalendarView, 'SharedCalendar')
+router.register(r'calendar', views.EventView, 'SharedCalendar')
+router.register(r'register', views.UserCreate, 'Register')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
