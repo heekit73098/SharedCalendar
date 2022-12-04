@@ -25,4 +25,8 @@ router.register(r'register', views.UserCreate, 'Register')
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('api/login/', views.LoginView.as_view()),
+    path('api/logout/', views.LogoutView.as_view()),
+    path('api/csrf/', views.get_csrf, name='api-csrf'),
+    path('api/session/', views.SessionView.as_view(), name='api-session')
 ]

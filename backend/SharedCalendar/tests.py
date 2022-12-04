@@ -49,3 +49,5 @@ class TestView(TestCase):
     def test_view(self):
         response = Client().get("/api/calendar/") 
         self.assertEqual(response.status_code, 200)
+
+

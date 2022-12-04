@@ -6,9 +6,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import Calendar from '@toast-ui/react-calendar';
 import { theme } from '../utils/theme';
+import AuthService from "../utils/authService";
 import axios from 'axios';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 type ViewType = 'month' | 'week' | 'day';
+
 
 const viewModeOptions = [
   {
@@ -25,11 +28,12 @@ const viewModeOptions = [
   },
 ];
 
-function App({ view }: { view: ViewType }) {
-  const calendarRef = useRef<typeof Calendar>(null);
+function CalendarComponent({ view }: { view: ViewType }) {
+  const calendarRef = useRef<typeof CalendarComponent>(null);
   const [selectedDateRangeText, setSelectedDateRangeText] = useState('');
   const [selectedView, setSelectedView] = useState(view);
   const [events, setEvents] = useState([])
+  const navigate = useNavigate()
   const initialCalendars: Options['calendars'] = [
     {
       id: '0',
@@ -48,7 +52,11 @@ function App({ view }: { view: ViewType }) {
   ];
 
   function refreshList() {
-    axios.get("http://localhost:8000/api/calendar")
+    axios.get("http://localhost:8000/api/calendar", { 
+      withCredentials:true, 
+      xsrfHeaderName:"X-CSRFTOKEN", 
+      xsrfCookieName: "csrftoken" 
+    })
     .then((res)=>{
       res.data.forEach((event: { start: Date; end: Date; }) => {
         event.start = new Date(event.start);
@@ -56,7 +64,10 @@ function App({ view }: { view: ViewType }) {
       });
       setEvents(res.data)
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      const goToLogin = () => navigate('/login')
+      goToLogin()
+    });
   } 
 
 
@@ -128,8 +139,11 @@ function App({ view }: { view: ViewType }) {
     console.groupEnd();
 
     const { id, calendarId } = res;
-    axios.delete("http://localhost:8000/api/calendar/"+ id).then((res) => refreshList());
-    // getCalInstance().deleteEvent(id, calendarId);
+    axios.delete("http://localhost:8000/api/calendar/"+ id, { 
+      withCredentials:true, 
+      xsrfHeaderName:"X-CSRFTOKEN", 
+      xsrfCookieName: "csrftoken" 
+    }).then((res) => refreshList());
   };
 
   const onChangeSelect = (ev: ChangeEvent<HTMLSelectElement>) => {
@@ -166,8 +180,11 @@ function App({ view }: { view: ViewType }) {
 
     const targetEvent = updateData.event;
     const changes = { ...updateData.changes };
-    axios.patch("http://localhost:8000/api/calendar/" + targetEvent.id + "/", changes).then((res) => refreshList());
-    // getCalInstance().updateEvent(targetEvent.id, targetEvent.calendarId, changes);
+    axios.patch("http://localhost:8000/api/calendar/" + targetEvent.id + "/", changes, { 
+      withCredentials:true, 
+      xsrfHeaderName:"X-CSRFTOKEN", 
+      xsrfCookieName: "csrftoken" 
+    }).then((res) => refreshList());
   };
 
   const onBeforeCreateEvent: ExternalEventTypes['beforeCreateEvent'] = (eventData) => {
@@ -184,9 +201,17 @@ function App({ view }: { view: ViewType }) {
       state: eventData.state,
       isPrivate: eventData.isPrivate,
     };
-    axios.post("http://localhost:8000/api/calendar/", event).then((res) => refreshList());
-    // getCalInstance().createEvents([event]);
+    axios.post("http://localhost:8000/api/calendar/", event, { 
+      withCredentials:true, 
+      xsrfHeaderName:"X-CSRFTOKEN", 
+      xsrfCookieName: "csrftoken" 
+    }).then((res) => refreshList());
   };
+
+  function logout() {
+    AuthService.logout();
+    navigate("/")
+  } 
 
   return (
     <div>
@@ -258,8 +283,9 @@ function App({ view }: { view: ViewType }) {
         onBeforeUpdateEvent={onBeforeUpdateEvent}
         onBeforeCreateEvent={onBeforeCreateEvent}
       />
+      <div><button onClick={logout}>Logout</button></div>
     </div>
   );
 }
 
-export default App;
+export default CalendarComponent;

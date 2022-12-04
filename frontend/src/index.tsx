@@ -1,7 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './assets/index.css';
-import App from './components/Calendar';
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import CalendarComponent from './components/Calendar';
 import Login from './components/Login';
 import Register from './components/Register';
 import reportWebVitals from './utils/reportWebVitals';
@@ -19,8 +20,16 @@ const root = ReactDOM.createRoot(
 // );
 root.render(
   <React.StrictMode>
-    <Login />
-    <Register />
+    <BrowserRouter>
+    <Routes>
+          <Route path="/" element={<Login />}/>
+          <Route path="/calendar" element={<CalendarComponent view={'month'} />}/>
+          <Route path="/login" element={<Login />}/>
+          <Route path="/register" element={<Register />}/>
+    </Routes>
+    </BrowserRouter>
+    {/* <Login />
+    <Register /> */}
   </React.StrictMode>
 );
 

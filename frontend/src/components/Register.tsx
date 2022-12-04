@@ -1,36 +1,15 @@
-import { Component } from "react";
+import { useState } from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
 import AuthService from "../utils/authService";
+import { Navigate } from "react-router-dom";
 
-type Props = {};
+export default function Register() {
+  const [successful, setSuccessful] = useState(false)
+  const [message, setMessage] = useState("")
 
-type State = {
-  email: string,
-  password: string,
-  first_name: string,
-  last_name: string,
-  successful: boolean,
-  message: string
-};
-
-export default class Register extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.handleRegister = this.handleRegister.bind(this);
-
-    this.state = {
-      email: "",
-      password: "",
-      first_name: "",
-      last_name: "",
-      successful: false,
-      message: ""
-    };
-  }
-
-  validationSchema() {
+  function validationSchema() {
     return Yup.object().shape({
       email: Yup.string()
         .email("This is not a valid email.")
@@ -48,13 +27,11 @@ export default class Register extends Component<Props, State> {
     });
   }
 
-  handleRegister(formValue: { email: string; password: string; first_name: string; last_name: string }) {
+  function handleRegister(formValue: { email: string; password: string; first_name: string; last_name: string }) {
     const { email, password, first_name, last_name } = formValue;
 
-    this.setState({
-      message: "",
-      successful: false
-    });
+    setMessage("")
+    setSuccessful(false)
 
     AuthService.register(
       email,
@@ -62,46 +39,41 @@ export default class Register extends Component<Props, State> {
       first_name,
       last_name
     ).then(
-        (      response: { data: { message: any; }; }) => {
-        this.setState({
-          message: response.data.message,
-          successful: true
-        });
-      },
-        (      error: { response: { data: { message: any; }; }; message: any; toString: () => any; }) => {
+        (response: { data: { message: any; }; }) => {
+          setMessage(response.data.message)
+          setSuccessful(true)
+        })
+      .catch((error) => {
         const resMessage =
           (error.response &&
             error.response.data &&
             error.response.data.message) ||
           error.message ||
           error.toString();
-
-        this.setState({
-          successful: false,
-          message: resMessage
-        });
+        setSuccessful(false)
+        setMessage(resMessage)
       }
     );
   }
 
-  render() {
-    const { successful, message } = this.state;
-
+  if (successful) {
+    return <Navigate to={"/login"} />
+  } else {
     const initialValues = {
       email: "",
       password: "",
       first_name: "",
       last_name: ""
     };
-
+  
     return (
       <div className="col-md-12">
         <div className="card card-container">
-
+  
           <Formik
             initialValues={initialValues}
-            validationSchema={this.validationSchema}
-            onSubmit={this.handleRegister}
+            validationSchema={validationSchema}
+            onSubmit={handleRegister}
           >
             <Form>
               {!successful && (
@@ -115,17 +87,17 @@ export default class Register extends Component<Props, State> {
                       className="alert alert-danger"
                     />
                   </div>
-
+  
                   <div className="form-group">
                     <label htmlFor="first_name"> First Name </label>
                     <Field name="first_name" type="text" className="form-control" />
                   </div>
-
+  
                   <div className="form-group">
                     <label htmlFor="last_name"> Last Name </label>
                     <Field name="last_name" type="text" className="form-control" />
                   </div>
-
+  
                   <div className="form-group">
                     <label htmlFor="password"> Password </label>
                     <Field
@@ -139,13 +111,13 @@ export default class Register extends Component<Props, State> {
                       className="alert alert-danger"
                     />
                   </div>
-
+  
                   <div className="form-group">
                     <button type="submit" className="btn btn-primary btn-block">Sign Up</button>
                   </div>
                 </div>
               )}
-
+  
               {message && (
                 <div className="form-group">
                   <div

@@ -1,25 +1,34 @@
 import axios from "axios";
 // TODO Update this with Backend
-const API_URL = "http://localhost:8000/api/";
+const API_URL = "http://localhost:8000/api/"
 
 class AuthService {
   login(username: string, password: string) {
     return axios
-      .post(API_URL + "signin", {
+      .post(API_URL + "login/", {
         username,
         password
+      }, {
+        withCredentials:true,
+        xsrfHeaderName:"X-CSRFTOKEN", 
+        xsrfCookieName: "csrftoken" 
       })
       .then(response => {
-        if (response.data.accessToken) {
-          localStorage.setItem("user", JSON.stringify(response.data));
-        }
-
-        return response.data;
+        console.log(response)
       });
   }
 
   logout() {
-    localStorage.removeItem("user");
+    return axios
+      .post(API_URL + "logout/", {}
+      , {
+        withCredentials:true,
+        xsrfHeaderName:"X-CSRFTOKEN", 
+        xsrfCookieName: "csrftoken" 
+      })
+      .then(response => {
+        console.log(response)
+      });
   }
 
   register(email: string, password: string, first_name: string, last_name: string) {

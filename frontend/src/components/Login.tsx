@@ -1,34 +1,15 @@
-import { Component } from "react";
-import { Navigate } from "react-router-dom";
+import { useState } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
 import AuthService from "../utils/authService";
 
-type Props = {};
-
-type State = {
-  redirect: string | null,
-  username: string,
-  password: string,
-  loading: boolean,
-  message: string
-};
-
-export default class Login extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.handleLogin = this.handleLogin.bind(this);
-
-    this.state = {
-      redirect: null,
-      username: "",
-      password: "",
-      loading: false,
-      message: ""
-    };
-  }
-
+export default function Login() {
+  const [redirect, setRedirect] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [message, setMessage] = useState("")
+  const navigate = useNavigate();
 //   componentDidMount() {
 //     const currentUser = AuthService.getCurrentUser();
 
@@ -41,97 +22,98 @@ export default class Login extends Component<Props, State> {
 //     window.location.reload();
 //   }
 
-  validationSchema() {
+  function validationSchema() {
     return Yup.object().shape({
       username: Yup.string().required("This field is required!"),
       password: Yup.string().required("This field is required!"),
     });
   }
 
-  handleLogin(formValue: { username: string; password: string }) {
+  function handleLogin(formValue: { username: string; password: string }) {
     const { username, password } = formValue;
-
-    this.setState({
-      message: "",
-      loading: true
-    });
-
+    setMessage("")
+    setLoading(true)
 
     AuthService.login(username, password).then(
-      () => {
-        this.setState({
-          redirect: "/profile"
-        });
+      (res) => {
+        setRedirect("/calendar")
+        console.log(res)
       },
       error => {
-        console.log(error)
+        setLoading(false)
+        setMessage(error.message)
       }
     );
   }
 
-  render() {
-    if (this.state.redirect) {
-        console.log("here")
-        return <Navigate to={this.state.redirect} />
-    }
-
-    const { loading, message } = this.state;
-
+  if (redirect !== "") {
+    return <Navigate to={redirect} />
+  } else {
     const initialValues = {
       username: "",
       password: "",
     };
 
     return (
-        <div className="col-md-12">
-          <div className="card card-container">
-  
-            <Formik
-              initialValues={initialValues}
-              validationSchema={this.validationSchema}
-              onSubmit={this.handleLogin}
-            >
-              <Form>
+      <div className="col-md-12">
+        <div className="card card-container">
+
+          <Formik
+            initialValues={initialValues}
+            validationSchema={validationSchema}
+            onSubmit={handleLogin}
+          >
+            <Form>
+              <div className="form-group">
+                <label htmlFor="username">Username/Email</label>
+                <Field name="username" type="text" className="form-control" />
+                <ErrorMessage
+                  name="username"
+                  component="div"
+                  className="alert alert-danger"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="password">Password</label>
+                <Field name="password" type="password" className="form-control" />
+                <ErrorMessage
+                  name="password"
+                  component="div"
+                  className="alert alert-danger"
+                />
+              </div>
+
+              <div className="form-group">
+                <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
+                  {loading && (
+                    <span className="spinner-border spinner-border-sm"></span>
+                  )}
+                  <span>Login</span>
+                </button>
+              </div>
+
+              {message && (
                 <div className="form-group">
-                  <label htmlFor="username">Username</label>
-                  <Field name="username" type="text" className="form-control" />
-                  <ErrorMessage
-                    name="username"
-                    component="div"
-                    className="alert alert-danger"
-                  />
-                </div>
-  
-                <div className="form-group">
-                  <label htmlFor="password">Password</label>
-                  <Field name="password" type="password" className="form-control" />
-                  <ErrorMessage
-                    name="password"
-                    component="div"
-                    className="alert alert-danger"
-                  />
-                </div>
-  
-                <div className="form-group">
-                  <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-                    {loading && (
-                      <span className="spinner-border spinner-border-sm"></span>
-                    )}
-                    <span>Login</span>
-                  </button>
-                </div>
-  
-                {message && (
-                  <div className="form-group">
-                    <div className="alert alert-danger" role="alert">
-                      {message}
-                    </div>
+                  <div className="alert alert-danger" role="alert">
+                    {message}
                   </div>
-                )}
-              </Form>
-            </Formik>
-          </div>
+                </div>
+              )}
+            </Form>
+          </Formik>
         </div>
-      );
+        <div>
+          <button
+            type="button"
+            className="btn btn-default btn-sm move-today"
+            data-action="move-today"
+            onClick={() => navigate("/register")}
+          >
+            Register
+          </button>
+        </div>
+      </div>
+    );
   }
 }
