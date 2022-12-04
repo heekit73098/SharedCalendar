@@ -46,8 +46,8 @@ class TestEvent(TestCase):
         self.assertEqual(event.end, "")
 
 class TestView(TestCase):
-    def test_view(self):
+    def test_view_fail_no_credentials(self):
         response = Client().get("/api/calendar/") 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 403)
 
 
