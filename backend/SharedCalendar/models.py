@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.crypto import get_random_string
+from django.contrib.auth.models import User
 import string
 
 
@@ -9,7 +10,7 @@ import string
 
 class Event(models.Model):
     calendarId = models.TextField(null=False)
-    id = models.TextField(primary_key=True, blank=True, unique=True)
+    id = models.TextField(primary_key=True, unique=True, blank=True)
     title = models.TextField(null=False)
     isAllday = models.BooleanField()
     start = models.TextField(null=False)
@@ -19,20 +20,38 @@ class Event(models.Model):
     location = models.TextField(blank=True)
     state = models.TextField()
     isPrivate = models.BooleanField()
-
-    def save(self, *args, **kwargs):  
-        while not self.id:
-            newID = get_random_string(6, allowed_chars=string.ascii_uppercase + string.digits)
-            if not Event.objects.filter(pk=newID).exists():
-                self.id = newID
-
-        super().save(*args, **kwargs)
-        
+    tag = models.TextField(blank=True)
+    owner = models.TextField()
 
     def __str__(self) -> str:
         return self.title
 
-class User(models.Model):
-    email = models.TextField(primary_key=True, unique=True)
+class Calendar(models.Model):
+    calendarID = models.TextField(primary_key=True, blank=True, unique=True)
     name = models.TextField()
-    saltedPassword = models.TextField()
+    users = models.ManyToManyField(User)
+
+    def save(self, *args, **kwargs):  
+        while not self.calendarID:
+            newID = get_random_string(6, allowed_chars=string.ascii_uppercase + string.digits)
+            if not Calendar.objects.filter(pk=newID).exists():
+                self.calendarID = newID
+        super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
+        return self.calendarID
+
+#TODO Add validation for hex colour
+class CalendarColor(models.Model):
+    calendarID = models.TextField()
+    user = models.TextField()
+    color = models.TextField()
+    
+    class Meta:
+        unique_together = ("calendarID", "user")
+
+
+
+
+
+

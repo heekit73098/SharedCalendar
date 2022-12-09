@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Event
+from .models import Calendar, Event, CalendarColor
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
@@ -7,7 +7,12 @@ from django.contrib.auth import authenticate
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
-        fields = ('calendarId', 'id', 'title', 'isAllday', 'start', 'end', 'category', 'dueDateClass', 'location', 'state', 'isPrivate')
+        fields = ('calendarId', 'id', 'title', 'isAllday', 'start', 'end', 'category', 'dueDateClass', 'location', 'state', 'isPrivate', 'tag', 'owner')
+
+class CalendarColorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CalendarColor
+        fields = ('calendarID', 'user', 'color')
 
 class UserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
@@ -65,4 +70,8 @@ class LoginSerializer(serializers.Serializer):
         # It will be used in the view.
         attrs['user'] = user
         return attrs
-    
+
+class CalendarSerializer(serializers.Serializer):
+    class Meta:
+        model = Calendar
+        fields = ("calendarID", "name")

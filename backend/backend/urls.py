@@ -19,14 +19,18 @@ from rest_framework import routers
 from SharedCalendar import views
 
 router = routers.DefaultRouter()
-router.register(r'calendar', views.EventView, 'SharedCalendar')
-router.register(r'register', views.UserCreate, 'Register')
+# router.register(r'register', views.UserCreate, 'Register')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include(router.urls)),
+    # path('api/', include(router.urls)),
+    path('api/register/', views.UserCreate.as_view()),
+    path('api/calendar/', views.EventView.as_view()),
+    path('api/color/', views.CalendarColorView.as_view()),
+    path('api/calendar/multi/', views.EventsView.as_view()),
     path('api/login/', views.LoginView.as_view()),
     path('api/logout/', views.LogoutView.as_view()),
-    path('api/csrf/', views.get_csrf, name='api-csrf'),
-    path('api/session/', views.SessionView.as_view(), name='api-session')
+    path('api/session/', views.SessionView.as_view()),
+    path('api/profile/', views.ProfileView.as_view()),
+    path('api/calendarConfig/', views.AddCalendarView.as_view())
 ]

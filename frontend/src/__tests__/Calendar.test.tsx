@@ -1,38 +1,52 @@
-import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, prettyDOM, render, waitFor } from '@testing-library/react';
 import CalendarComponent from '../components/Calendar';
 import '@testing-library/jest-dom'
 import axios from 'axios';
-import { act } from 'react-dom/test-utils';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import MockAdaptor from 'axios-mock-adapter'
+import Constants from '../assets/testResBody';
 
+const mockedUsedNavigate = jest.fn();
+jest.mock('react-router-dom', () => ({
+   ...jest.requireActual('react-router-dom'),
+  useNavigate: () => mockedUsedNavigate,
+}));
 
-jest.mock('axios');
+test('renders base layout of calendars', async () => {
+  // Use the axios-mock-adapter library to mock the API call to the Django backend
+  const axiosMock = new MockAdaptor(axios);
+  axiosMock.onGet('http://localhost:8000/api/calendar/').reply(200, Constants.GET_EVENTS_BODY);
+  axiosMock.onGet('http://localhost:8000/api/color/').reply(200, Constants.GET_COLOR_BODY);
+  axiosMock.onGet('http://localhost:8000/api/calendarConfig/').reply(200, Constants.GET_CALENDAR_BODY);
 
-// Simple Rendering Unit Tests
-test("test Render Today Button", async () => {
-  await act(async () => {
-    render(<BrowserRouter><Routes><Route element={<CalendarComponent view={'month'} />}/></Routes></BrowserRouter>);
-  });
-  await waitFor(() => {
-    expect(screen.getByText(/today/i)).toBeInTheDocument();
-  })
+  const renderer = await act(async () => render(<CalendarComponent view={'month'} />))
+  const prevElement = await waitFor(() =>
+    renderer.getByText("Prev")
+  );
+  expect(prevElement).toBeInTheDocument();
+  const nextElement = await waitFor(() =>
+    renderer.getByText("Next")
+  );
+  expect(nextElement).toBeInTheDocument();
+  const todayElement = await waitFor(() =>
+    renderer.getByText("Today")
+  );
+  expect(todayElement).toBeInTheDocument();
 });
 
-test("test Render Prev Button", async () => {
-  await act(async () => {
-    render(<BrowserRouter><CalendarComponent view={'month'} /></BrowserRouter>);
-  });
-  await waitFor(() => {
-    expect(screen.getByText(/prev/i)).toBeInTheDocument();
-  })
-});
+test('renders test calendars', async () => {
+  // Use the axios-mock-adapter library to mock the API call to the Django backend
+  const axiosMock = new MockAdaptor(axios);
+  axiosMock.onGet('http://localhost:8000/api/calendar/').reply(200, Constants.GET_EVENTS_BODY);
+  axiosMock.onGet('http://localhost:8000/api/color/').reply(200, Constants.GET_COLOR_BODY);
+  axiosMock.onGet('http://localhost:8000/api/calendarConfig/').reply(200, Constants.GET_CALENDAR_BODY);
 
-test("test Render Next Button", async () => {
-  await act(async () => {
-    render(<BrowserRouter><CalendarComponent view={'month'} /></BrowserRouter>);
-  });
-  await waitFor(() => {
-    expect(screen.getByText(/next/i)).toBeInTheDocument();
-  })
+  const renderer = await act(async () => render(<CalendarComponent view={'month'} />))
+  const calendarElement_one = await waitFor(() =>
+    renderer.getByText("Personal")
+  );
+  expect(calendarElement_one).toBeInTheDocument();
+  const calendarElement_two = await waitFor(() =>
+    renderer.getByText("TestCal")
+  );
+  expect(calendarElement_two).toBeInTheDocument();
 });

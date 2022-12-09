@@ -6,11 +6,26 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import Calendar from '@toast-ui/react-calendar';
 import { theme } from '../utils/theme';
-import AuthService from "../utils/authService";
-import axios from 'axios';
-import { Navigate, useNavigate } from 'react-router-dom';
+import CalendarService from "../utils/calendarService"
+import { useNavigate } from 'react-router-dom';
+import NavBar from './NavBar';
+import ProfileService from '../utils/profileService';
 
 type ViewType = 'month' | 'week' | 'day';
+type CalendarEvent = {
+  calendarId: string; 
+  id: string; 
+  title: string | undefined; 
+  isAllday: boolean | undefined; 
+  start: string | undefined; 
+  end: string | undefined; 
+  category: string; 
+  dueDateClass: string; 
+  location: string | undefined; 
+  state: string | undefined; 
+  isPrivate: boolean | undefined; 
+  tag:string
+}
 
 
 const viewModeOptions = [
@@ -29,11 +44,16 @@ const viewModeOptions = [
 ];
 
 function CalendarComponent({ view }: { view: ViewType }) {
+  const navigate = useNavigate()
   const calendarRef = useRef<typeof CalendarComponent>(null);
   const [selectedDateRangeText, setSelectedDateRangeText] = useState('');
   const [selectedView, setSelectedView] = useState(view);
-  const [events, setEvents] = useState([])
-  const navigate = useNavigate()
+  const [events, setEvents] = useState<never[]>([])
+  const [filteredEvents, setFilteredEvents] = useState<never[]>([])
+  const [calendars, setCalendars] = useState<Options['calendars']>([])
+  const [filteredCalendars, setFilteredCalendars] = useState<Options['calendars']>([])
+  const [applyToAll, setApplyToAll] = useState(false)
+  const [loaded, setLoaded] = useState(false)
   const initialCalendars: Options['calendars'] = [
     {
       id: '0',
@@ -50,25 +70,6 @@ function CalendarComponent({ view }: { view: ViewType }) {
       dragBackgroundColor: '#00a9ff',
     },
   ];
-
-  function refreshList() {
-    axios.get("http://localhost:8000/api/calendar", { 
-      withCredentials:true, 
-      xsrfHeaderName:"X-CSRFTOKEN", 
-      xsrfCookieName: "csrftoken" 
-    })
-    .then((res)=>{
-      res.data.forEach((event: { start: Date; end: Date; }) => {
-        event.start = new Date(event.start);
-        event.end = new Date(event.end);
-      });
-      setEvents(res.data)
-    })
-    .catch((err) => {
-      const goToLogin = () => navigate('/login')
-      goToLogin()
-    });
-  } 
 
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -124,26 +125,118 @@ function CalendarComponent({ view }: { view: ViewType }) {
   }, [selectedView, updateRenderRangeText]);
 
   useEffect(() => {
-    refreshList();
+    if (refreshFilteredEvents(events)){
+      setLoaded(true)
+    }
+    
+  }, [filteredCalendars, setFilteredCalendars, events, setEvents])
+
+  useEffect(() => {
+    ProfileService.getCalendars().then(res => {
+      var calendarArray: Options['calendars'] = []
+      res.data.forEach((calendar: string[]) => {
+        calendarArray?.push({
+          id: calendar[0],
+          name: calendar[1]
+        })
+      });
+      ProfileService.getColors().then(res => {
+        
+        calendarArray?.forEach((calendar) => {
+          var index = res.data.findIndex(function(c: { [x: string]: string; }) {
+            return c["calendarID"] === calendar.id
+          });
+          calendar.backgroundColor = res.data[index]["color"]
+          calendar.borderColor = res.data[index]["color"]
+          calendar.dragBackgroundColor = res.data[index]["color"]
+        })
+        setCalendars(calendarArray)
+        setFilteredCalendars(calendarArray)
+        refreshEvents()
+      }).catch((err) => {
+        console.log(err.response.status)
+        if (err.response.status == 403) {
+          navigate("/login")
+        } else {
+          console.log(err)
+      }
+      })
+    }).catch((err) => {
+      console.log(err.response.status)
+      if (err.response.status == 403) {
+        navigate("/login")
+      } else {
+        console.log(err)
+    }
+    })
   }, [])
+
+  function refreshFilteredEvents(array: never[]): boolean {
+    if (!(events.length && filteredCalendars?.length)) {
+      setFilteredEvents([])
+      return false
+    }
+    array = array.filter((event: { calendarId: string; }) => {
+      return (filteredCalendars!.map(a => a.id).includes(event.calendarId));
+    })
+    const filteredData = array.filter((value: { tag: any; }, index: any, self: any[]) => 
+      self.findIndex(v => v.tag === value.tag) === index
+    );
+    setFilteredEvents(filteredData)
+    return true
+  }
+
+
+  function refreshEvents() {
+    CalendarService.refreshList()
+    .then((res)=>{
+      res.data.forEach((event: {
+        attendees: string[];
+        owner: string; 
+        start: Date; 
+        end: Date; 
+        tag: string;
+      }) => {
+          event.start = new Date(event.start);
+          event.end = new Date(event.end);
+          event.attendees = [event.owner]
+      });
+      setEvents(res.data)
+    })
+    .catch((err) => {
+      console.log(err.response.status)
+      if (err.response.status == 403) {
+        navigate("/login")
+      } else {
+        console.log(err)
+      }
+    });
+  }
+
+  function handleChecked() {
+    setApplyToAll(!applyToAll)
+  }
+
+  function filterCalendars(event: { target: { checked: boolean; value: string; }; }) {
+    if (event.target.checked) {
+      if (!filteredCalendars?.some(e => e.id == event.target.value)) {
+        if (filteredCalendars && calendars?.find(x => x.id === event.target.value)){
+          setFilteredCalendars([...filteredCalendars,calendars?.find(x => x.id === event.target.value)!])
+        }else{
+          setFilteredCalendars([calendars?.find(x => x.id === event.target.value)!])
+        }
+      }
+    } else{
+      setFilteredCalendars(filteredCalendars?.filter((calendar) => {
+        return calendar.id !== event.target.value;
+      }))
+    }
+  }
 
   const onAfterRenderEvent: ExternalEventTypes['afterRenderEvent'] = (res) => {
     console.group('onAfterRenderEvent');
     console.log('Event Info : ', res.title);
     console.groupEnd();
-  };
-
-  const onBeforeDeleteEvent: ExternalEventTypes['beforeDeleteEvent'] = (res) => {
-    console.group('onBeforeDeleteEvent');
-    console.log('Event Info : ', res.title);
-    console.groupEnd();
-
-    const { id, calendarId } = res;
-    axios.delete("http://localhost:8000/api/calendar/"+ id, { 
-      withCredentials:true, 
-      xsrfHeaderName:"X-CSRFTOKEN", 
-      xsrfCookieName: "csrftoken" 
-    }).then((res) => refreshList());
   };
 
   const onChangeSelect = (ev: ChangeEvent<HTMLSelectElement>) => {
@@ -172,49 +265,85 @@ function CalendarComponent({ view }: { view: ViewType }) {
     console.groupEnd();
   };
 
+  const onBeforeDeleteEvent: ExternalEventTypes['beforeDeleteEvent'] = (res) => {
+    console.group('onBeforeDeleteEvent');
+    console.log('Event Info : ', res.title);
+    console.groupEnd();
+
+    var index = events.findIndex(function(event) {
+      return event["id"] === res.id
+    });
+    var tag = events[index]["tag"]
+    CalendarService.deleteEvent(tag).then((res) => refreshEvents());
+  };
+
 
   const onBeforeUpdateEvent: ExternalEventTypes['beforeUpdateEvent'] = (updateData) => {
     console.group('onBeforeUpdateEvent');
     console.log(updateData);
     console.groupEnd();
+    if ('start' in updateData.changes){
+      updateData.changes.start = updateData.changes.start?.toString()
+    }
+    if ('end' in updateData.changes){
+      updateData.changes.end = updateData.changes.end?.toString()
+    }
+    if ('isAllday' in updateData.changes){
+      updateData.changes.category = updateData.changes.isAllday ? 'allday' : 'time'
+    }
 
     const targetEvent = updateData.event;
     const changes = { ...updateData.changes };
-    axios.patch("http://localhost:8000/api/calendar/" + targetEvent.id + "/", changes, { 
-      withCredentials:true, 
-      xsrfHeaderName:"X-CSRFTOKEN", 
-      xsrfCookieName: "csrftoken" 
-    }).then((res) => refreshList());
+    var index = events.findIndex(function(event) {
+      return event["id"] === targetEvent.id
+    });
+    var tag = events[index]["tag"]
+    CalendarService.updateEvent(tag, changes).then((res) => refreshEvents());
   };
 
   const onBeforeCreateEvent: ExternalEventTypes['beforeCreateEvent'] = (eventData) => {
-    const event = {
-      calendarId: eventData.calendarId || '',
-      id: "",
-      title: eventData.title,
-      isAllday: eventData.isAllday,
-      start: eventData.start?.toString(),
-      end: eventData.end?.toString(),
-      category: eventData.isAllday ? 'allday' : 'time',
-      dueDateClass: '',
-      location: eventData.location,
-      state: eventData.state,
-      isPrivate: eventData.isPrivate,
-    };
-    axios.post("http://localhost:8000/api/calendar/", event, { 
-      withCredentials:true, 
-      xsrfHeaderName:"X-CSRFTOKEN", 
-      xsrfCookieName: "csrftoken" 
-    }).then((res) => refreshList());
+    if (applyToAll) {
+      var events: CalendarEvent[] = []
+      calendars?.forEach(calendar => {
+        events.push({
+          calendarId: calendar.id || '',
+          id: "",
+          title: eventData.title,
+          isAllday: eventData.isAllday,
+          start: eventData.start?.toString(),
+          end: eventData.end?.toString(),
+          category: eventData.isAllday ? 'allday' : 'time',
+          dueDateClass: '',
+          location: eventData.location,
+          state: eventData.state,
+          isPrivate: eventData.isPrivate,
+          tag: ''
+        })
+      });
+      CalendarService.createEvents(events).then((res) => refreshEvents());
+    } else {
+      const event = {
+        calendarId: eventData.calendarId || '',
+        id: "",
+        title: eventData.title,
+        isAllday: eventData.isAllday,
+        start: eventData.start?.toString(),
+        end: eventData.end?.toString(),
+        category: eventData.isAllday ? 'allday' : 'time',
+        dueDateClass: '',
+        location: eventData.location,
+        state: eventData.state,
+        isPrivate: eventData.isPrivate,
+        tag: ''
+      };
+      CalendarService.createEvent(event).then((res) => refreshEvents());
+    }
+    
   };
-
-  function logout() {
-    AuthService.logout();
-    navigate("/")
-  } 
 
   return (
     <div>
+      <NavBar />
       <h1>Calendar</h1>
       <div>
         <select onChange={onChangeSelect} value={selectedView}>
@@ -250,13 +379,29 @@ function CalendarComponent({ view }: { view: ViewType }) {
             Next
           </button>
         </span>
+        <span>
+          <label>
+            Add to all Calendars? <input type="checkbox" checked={applyToAll} onChange={handleChecked}/>
+          </label>
+        </span>
+        <br></br>
         <span className="render-range">{selectedDateRangeText}</span>
       </div>
+      <table>
+        <tbody>
+          {calendars?.map(item => {
+                      return (
+                          <tr><td><label key={item.id}>{item.name}</label></td><td><input key={item.id} type="checkbox" id={item.id} value={item.id} defaultChecked={true} onChange={filterCalendars} /></td></tr>
+                      );
+                      })}
+        </tbody>
+      </table>
+      
       <Calendar
         height="600px"
-        calendars={initialCalendars}
+        calendars={filteredCalendars}
         month={{ startDayOfWeek: 1 }}
-        events={events}
+        events={filteredEvents}
         // template={{
         //   milestone(event) {
         //     return `<span style="color: #fff; background-color: ${event.backgroundColor};">${event.title}</span>`;
@@ -283,7 +428,6 @@ function CalendarComponent({ view }: { view: ViewType }) {
         onBeforeUpdateEvent={onBeforeUpdateEvent}
         onBeforeCreateEvent={onBeforeCreateEvent}
       />
-      <div><button onClick={logout}>Logout</button></div>
     </div>
   );
 }

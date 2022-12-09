@@ -54,3 +54,8 @@ body {
   height: 12px;
   margin-right: 2px;
 }
+
+[type="checkbox"]
+{
+    vertical-align:text-top;
+}

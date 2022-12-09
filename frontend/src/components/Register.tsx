@@ -15,20 +15,21 @@ export default function Register() {
         .email("This is not a valid email.")
         .required("This field is required!"),
       password: Yup.string()
-        .test(
-          "len",
-          "The password must be between 8 and 40 characters.",
-          (val: any) =>
-            val &&
-            val.toString().length >= 8 &&
-            val.toString().length <= 40
-        )
+        .min(8, "Must be 8 characters or more")
+        .max(30, "Not more than 30 characters")
+        .matches(/[a-z]+/, "One lowercase character")
+        .matches(/[A-Z]+/, "One uppercase character")
+        .matches(/[@$!%*#?&]+/, "One special character")
+        .matches(/\d+/, "One number")
         .required("This field is required!"),
+      passwordVal: Yup.string()
+        .oneOf([Yup.ref('password'), null], 'Passwords must match')
+        .required("This field is required!")
     });
   }
 
-  function handleRegister(formValue: { email: string; password: string; first_name: string; last_name: string }) {
-    const { email, password, first_name, last_name } = formValue;
+  function handleRegister(formValue: { email: string; password: string; first_name: string; last_name: string; passwordVal: string }) {
+    const { email, password, first_name, last_name, passwordVal } = formValue;
 
     setMessage("")
     setSuccessful(false)
@@ -63,7 +64,8 @@ export default function Register() {
       email: "",
       password: "",
       first_name: "",
-      last_name: ""
+      last_name: "",
+      passwordVal: ""
     };
   
     return (
@@ -107,6 +109,20 @@ export default function Register() {
                     />
                     <ErrorMessage
                       name="password"
+                      component="div"
+                      className="alert alert-danger"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label htmlFor="passwordVal"> Re-Type Password </label>
+                    <Field
+                      name="passwordVal"
+                      type="password"
+                      className="form-control"
+                    />
+                    <ErrorMessage
+                      name="passwordVal"
                       component="div"
                       className="alert alert-danger"
                     />

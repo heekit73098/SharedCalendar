@@ -1,5 +1,5 @@
 import axios from "axios";
-// TODO Update this with Backend
+
 const API_URL = "http://localhost:8000/api/"
 
 class AuthService {
@@ -41,12 +41,10 @@ class AuthService {
     });
   }
 
-  getCurrentUser() {
-    const userStr = localStorage.getItem("user");
-    if (userStr) return JSON.parse(userStr);
-
-    return null;
+  getUser() {
+    return axios.get(API_URL)
   }
+
 }
 
 export default new AuthService();
