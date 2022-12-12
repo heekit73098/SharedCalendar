@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
+import { Tooltip } from 'react-tooltip'
+import 'react-tooltip/dist/react-tooltip.css'
 import * as Yup from "yup";
 
 import AuthService from "../utils/authService";
@@ -8,6 +10,8 @@ import { Navigate } from "react-router-dom";
 export default function Register() {
   const [successful, setSuccessful] = useState(false)
   const [message, setMessage] = useState("")
+
+  const popup = "Password should be 8-30 characters long<br />At least one<ul><li>Lowercase Letter</li><li>Uppercase Letter</li><li>Special Character</li><li>Digit</li></ul>"
 
   function validationSchema() {
     return Yup.object().shape({
@@ -99,9 +103,9 @@ export default function Register() {
                     <label htmlFor="last_name"> Last Name </label>
                     <Field name="last_name" type="text" className="form-control" />
                   </div>
-  
+                  
                   <div className="form-group">
-                    <label htmlFor="password"> Password </label>
+                    <label htmlFor="password"> Password <a id="props-basic"><span>&#9432;</span> </a> <Tooltip anchorId="props-basic" html={popup} /> </label>
                     <Field
                       name="password"
                       type="password"

@@ -61,6 +61,7 @@
     "hex-and-rgba": "^2.0.0",
     "jest-environment-jsdom": "^29.3.1",
     "react-color": "^2.19.3",
+    "react-tooltip": "^5.0.0",
     "ts-jest": "^29.0.3"
   }
 }

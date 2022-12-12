@@ -136,6 +136,13 @@ class ProfileView(APIView):
             'email': user.get_username(),
             'full_name': user.get_full_name()
         }, status=status.HTTP_200_OK)
+    def post(self, request):
+        user = get_user(request)
+        password = request.data["password"]
+        user.set_password(password)
+        user.save()
+        login(request, user)
+        return Response(None, status=status.HTTP_200_OK)
 
 class AddCalendarView(APIView):
     def get(self, request):
@@ -169,7 +176,6 @@ class CalendarColorView(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        print(request.data)
         username = get_user(request).get_username()
         for calendar in request.data:
             try:

@@ -10,17 +10,6 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")
   const navigate = useNavigate();
-//   componentDidMount() {
-//     const currentUser = AuthService.getCurrentUser();
-
-//     if (currentUser) {
-//       this.setState({ redirect: "/profile" });
-//     };
-//   }
-
-//   componentWillUnmount() {
-//     window.location.reload();
-//   }
 
   function validationSchema() {
     return Yup.object().shape({
@@ -43,8 +32,7 @@ export default function Login() {
         setLoading(false)
         setMessage(error.message)
       }
-    );
-  }
+    )}
 
   if (redirect !== "") {
     return <Navigate to={redirect} />
@@ -106,7 +94,7 @@ export default function Login() {
         <div>
           <button
             type="button"
-            className="btn btn-default btn-sm move-today"
+            className="btn btn-primary btn-block"
             data-action="move-today"
             onClick={() => navigate("/register")}
           >

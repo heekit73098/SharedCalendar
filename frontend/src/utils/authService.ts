@@ -45,6 +45,16 @@ class AuthService {
     return axios.get(API_URL)
   }
 
+  changePassword(password: string){
+    return axios.post(API_URL + "profile/", {
+      password
+    }, {
+      withCredentials:true,
+      xsrfHeaderName:"X-CSRFTOKEN", 
+      xsrfCookieName: "csrftoken" 
+    })
+  }
+
 }
 
 export default new AuthService();
