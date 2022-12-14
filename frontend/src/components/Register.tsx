@@ -5,12 +5,12 @@ import 'react-tooltip/dist/react-tooltip.css'
 import * as Yup from "yup";
 
 import AuthService from "../utils/authService";
-import { Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function Register() {
   const [successful, setSuccessful] = useState(false)
   const [message, setMessage] = useState("")
-
+  const navigate = useNavigate()
   const popup = "Password should be 8-30 characters long<br />At least one<ul><li>Lowercase Letter</li><li>Uppercase Letter</li><li>Special Character</li><li>Digit</li></ul>"
 
   function validationSchema() {
@@ -61,99 +61,96 @@ export default function Register() {
     );
   }
 
-  if (successful) {
-    return <Navigate to={"/login"} />
-  } else {
-    const initialValues = {
-      email: "",
-      password: "",
-      first_name: "",
-      last_name: "",
-      passwordVal: ""
-    };
-  
-    return (
-      <div className="col-md-12">
-        <div className="card card-container">
-  
-          <Formik
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={handleRegister}
-          >
-            <Form>
-              {!successful && (
-                <div>
-                  <div className="form-group">
-                    <label htmlFor="email"> Email </label>
-                    <Field name="email" type="email" className="form-control" />
-                    <ErrorMessage
-                      name="email"
-                      component="div"
-                      className="alert alert-danger"
-                    />
-                  </div>
-  
-                  <div className="form-group">
-                    <label htmlFor="first_name"> First Name </label>
-                    <Field name="first_name" type="text" className="form-control" />
-                  </div>
-  
-                  <div className="form-group">
-                    <label htmlFor="last_name"> Last Name </label>
-                    <Field name="last_name" type="text" className="form-control" />
-                  </div>
-                  
-                  <div className="form-group">
-                    <label htmlFor="password"> Password <a id="props-basic"><span>&#9432;</span> </a> <Tooltip anchorId="props-basic" html={popup} /> </label>
-                    <Field
-                      name="password"
-                      type="password"
-                      className="form-control"
-                    />
-                    <ErrorMessage
-                      name="password"
-                      component="div"
-                      className="alert alert-danger"
-                    />
-                  </div>
+  const initialValues = {
+    email: "",
+    password: "",
+    first_name: "",
+    last_name: "",
+    passwordVal: ""
+  };
 
-                  <div className="form-group">
-                    <label htmlFor="passwordVal"> Re-Type Password </label>
-                    <Field
-                      name="passwordVal"
-                      type="password"
-                      className="form-control"
-                    />
-                    <ErrorMessage
-                      name="passwordVal"
-                      component="div"
-                      className="alert alert-danger"
-                    />
-                  </div>
-  
-                  <div className="form-group">
-                    <button type="submit" className="btn btn-primary btn-block">Sign Up</button>
-                  </div>
-                </div>
-              )}
-  
-              {message && (
+  return (
+    <div className="col-md-12">
+      <div className="card card-container">
+
+        <Formik
+          initialValues={initialValues}
+          validationSchema={validationSchema}
+          onSubmit={handleRegister}
+        >
+          <Form>
+            {!successful && (
+              <div>
                 <div className="form-group">
-                  <div
-                    className={
-                      successful ? "alert alert-success" : "alert alert-danger"
-                    }
-                    role="alert"
-                  >
-                    {message}
-                  </div>
+                  <label htmlFor="email"> Email </label>
+                  <Field name="email" type="email" className="form-control" />
+                  <ErrorMessage
+                    name="email"
+                    component="div"
+                    className="alert alert-danger"
+                  />
                 </div>
-              )}
-            </Form>
-          </Formik>
-        </div>
+
+                <div className="form-group">
+                  <label htmlFor="first_name"> First Name </label>
+                  <Field name="first_name" type="text" className="form-control" />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="last_name"> Last Name </label>
+                  <Field name="last_name" type="text" className="form-control" />
+                </div>
+                
+                <div className="form-group">
+                  <label htmlFor="password"> Password <a id="props-basic"><span>&#9432;</span> </a> <Tooltip anchorId="props-basic" html={popup} /> </label>
+                  <Field
+                    name="password"
+                    type="password"
+                    className="form-control"
+                  />
+                  <ErrorMessage
+                    name="password"
+                    component="div"
+                    className="alert alert-danger"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="passwordVal"> Re-Type Password </label>
+                  <Field
+                    name="passwordVal"
+                    type="password"
+                    className="form-control"
+                  />
+                  <ErrorMessage
+                    name="passwordVal"
+                    component="div"
+                    className="alert alert-danger"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <button type="submit" className="btn btn-primary btn-block">Sign Up</button>
+                </div>
+              </div>
+            )}
+
+            {message && (
+              <div className="form-group">
+                <div
+                  className={
+                    successful ? "alert alert-success" : "alert alert-danger"
+                  }
+                  role="alert"
+                >
+                  {message}
+                </div>
+                <button type="button" className="btn btn-primary btn-block" onClick={() => navigate("/login")}>Go To Login</button>
+              </div>
+            )}
+          </Form>
+        </Formik>
       </div>
-    );
-  }
+    </div>
+  );
 }

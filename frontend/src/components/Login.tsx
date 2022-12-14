@@ -26,11 +26,10 @@ export default function Login() {
     AuthService.login(username, password).then(
       (res) => {
         setRedirect("/calendar")
-        console.log(res)
       },
       error => {
         setLoading(false)
-        setMessage(error.message)
+        setMessage(error.response.data.message)
       }
     )}
 

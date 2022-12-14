@@ -1,3 +1,4 @@
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework import viewsets, status, permissions
 from .serializers import EventSerializer, UserSerializer, LoginSerializer, CalendarColorSerializer
 from .models import Calendar, Event, CalendarColor
@@ -5,12 +6,35 @@ from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.contrib.auth import login, logout, get_user
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.utils.crypto import get_random_string
 from django.db.utils import IntegrityError
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
 import string
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+import threading
+
+class EmailThread(threading.Thread):
+    def __init__(self, mail_subject, message, to_email):
+        self.mail_subject = mail_subject
+        self.message = message
+        self.to_email = to_email
+        threading.Thread.__init__(self)
+
+    def run (self):
+        email = EmailMessage(
+            self.mail_subject, self.message, to=[self.to_email]
+        )
+        email.send()
+
+def sendEmail(mail_subject, message, to_email):
+    EmailThread(mail_subject, message, to_email).start()
 # Create your views here.
 
+tokenGenerator = PasswordResetTokenGenerator()  
+defaultColor = "#0000FF"
 
 class EventView(APIView):
     
@@ -101,28 +125,70 @@ class UserCreate(APIView):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+            user.is_active = False
+            user.save()
             if user:
-                createdCalendar = Calendar(
-                    calendarID = "",
-                    name = "Personal"
-                )
-                createdCalendar.save()
-                createdCalendar.users.add(user)
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                current_site = get_current_site(request)
+                mail_subject = 'Activation link for Futurum'
+                message = render_to_string('account_activation.html', {
+                    'user': user.get_short_name(), 
+                    'domain': current_site.domain,
+                    'uid': urlsafe_base64_encode(user.get_username().encode()),
+                    'token': tokenGenerator.make_token(user),
+                })
+                to_email = user.email   
+        else:
+            if User.objects.filter(username=request.data['username']).exists():
+                user = User.objects.get(username=request.data['username'])
+                mail_subject = 'Duplicate Registration on Futurum'
+                message = f"Hi {user.get_short_name()},\nSomeone tried to register an account on Futurum with your email address. If this was not done by you, rest assured that your account is safe with us."
+                to_email = user.email
+        sendEmail(mail_subject, message, to_email)
+        return Response({"message":'A confirmation email has been sent to your email address.'}, status=status.HTTP_201_CREATED)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class ActivateView(APIView):
+    permission_classes = (permissions.AllowAny,)
+    http_method_names = ['get']
+    def get(self, request, uidb64, token):
+        username = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(username=username)
+        if tokenGenerator.check_token(user, token):
+            user.is_active = True
+            user.save()
+            createdCalendar = Calendar(
+                calendarID = "",
+                name = "Personal"
+            )
+            createdCalendar.save()
+            createdCalendar.users.add(user)
+            CalendarColor.objects.create(
+                calendarID=createdCalendar.calendarID,
+                user=user.get_username(),
+                color=defaultColor
+            )
+            return HttpResponse("Email activated")
+        else:
+            return HttpResponse("Wrong token")
+
+
 
 class LoginView(APIView):
     # This view should be accessible also for unauthenticated users.
     permission_classes = (permissions.AllowAny,)
-
     def post(self, request, format=None):
         serializer = LoginSerializer(data=self.request.data,
             context={ 'request': self.request })
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        login(request, user)
-        return Response(None, status=status.HTTP_202_ACCEPTED)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            login(request, user)
+            return Response(None, status=status.HTTP_202_ACCEPTED)
+        else:
+            if User.objects.filter(username=request.data['username']).exists():
+                user = User.objects.get(username=request.data['username'])
+                if not user.is_active:
+                    return Response({"message": "Please activate your account first!"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"message": "Invalid Username/Password"}, status=status.HTTP_403_FORBIDDEN)
+        
 
 class LogoutView(APIView):
     def post(self, request, format=None):
@@ -155,6 +221,11 @@ class AddCalendarView(APIView):
         if request.data["choice"] == "join":
             if Calendar.objects.filter(calendarID = request.data["field"]).exists():
                 Calendar.objects.get(pk=request.data["field"]).users.add(user)
+                CalendarColor.objects.create(
+                    calendarID=Calendar.objects.get(pk=request.data["field"]).calendarID,
+                    user=user.get_username(),
+                    color=defaultColor
+                )
                 return Response(None, status=status.HTTP_201_CREATED)
             else:
                 return Response({"Error": "Invalid ID"}, status=status.HTTP_406_NOT_ACCEPTABLE)
@@ -166,6 +237,11 @@ class AddCalendarView(APIView):
             createdCalendar.save()
             createdID = createdCalendar.calendarID
             createdCalendar.users.add(user)
+            CalendarColor.objects.create(
+                calendarID=createdID,
+                user=user.get_username(),
+                color=defaultColor
+            )
             return Response({'calendarID': createdID}, status=status.HTTP_201_CREATED)
 
 class CalendarColorView(APIView):
@@ -189,10 +265,8 @@ class CalendarColorView(APIView):
                     }
                 )
             except IntegrityError:
-                print("No Change to Color")
                 continue
         return Response(None, status=status.HTTP_200_OK)
-        
 
 class SessionView(APIView):
     @staticmethod

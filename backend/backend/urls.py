@@ -32,5 +32,6 @@ urlpatterns = [
     path('api/logout/', views.LogoutView.as_view()),
     path('api/session/', views.SessionView.as_view()),
     path('api/profile/', views.ProfileView.as_view()),
-    path('api/calendarConfig/', views.AddCalendarView.as_view())
+    path('api/calendarConfig/', views.AddCalendarView.as_view()),
+    path('activate/<str:uidb64>/<str:token>/', views.ActivateView.as_view(), name='activate'),
 ]

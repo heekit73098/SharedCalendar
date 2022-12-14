@@ -3,10 +3,11 @@ from django.utils.crypto import get_random_string
 from django.contrib.auth.models import User
 import string
 
-
-
-
 # Create your models here.
+
+User._meta.get_field('email')._unique = True
+User._meta.get_field('email').blank = False
+User._meta.get_field('email').null = False
 
 class Event(models.Model):
     calendarId = models.TextField(null=False)
