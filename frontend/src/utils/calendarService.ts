@@ -15,53 +15,34 @@ type CalendarEvent = {
     state: string | undefined; 
     isPrivate: boolean | undefined; 
     tag:string
-  }
+}
+
+const config = {
+    withCredentials:true,
+    xsrfHeaderName:"X-CSRFTOKEN", 
+    xsrfCookieName: "csrftoken" 
+}
 
 class CalendarService {
     
     refreshList() {
-        return (axios.get(API_URL, { 
-            withCredentials:true, 
-            xsrfHeaderName:"X-CSRFTOKEN", 
-            xsrfCookieName: "csrftoken" 
-        })  
-        )
+        return (axios.get(API_URL, config))
     }
 
     deleteEvent(tag: string) {
-        return (axios.delete(API_URL + '?tag=' + tag, { 
-            withCredentials:true, 
-            xsrfHeaderName:"X-CSRFTOKEN", 
-            xsrfCookieName: "csrftoken" 
-        })
-        )
+        return (axios.delete(API_URL + '?tag=' + tag, config))
     }
 
     createEvent(event: CalendarEvent) {
-        return (axios.post(API_URL, event, { 
-            withCredentials:true, 
-            xsrfHeaderName:"X-CSRFTOKEN", 
-            xsrfCookieName: "csrftoken" 
-        })
-        )
+        return (axios.post(API_URL, event, config))
     }
 
     createEvents(events: CalendarEvent[]) {
-        return (axios.post(API_URL + "multi/", events, { 
-            withCredentials:true, 
-            xsrfHeaderName:"X-CSRFTOKEN", 
-            xsrfCookieName: "csrftoken" 
-        })
-        )
+        return (axios.post(API_URL + "multi/", events, config))
     }
 
     updateEvent(tag: string, changes: {}) {
-        return (axios.patch(API_URL + '?tag=' + tag, changes, { 
-        withCredentials:true, 
-        xsrfHeaderName:"X-CSRFTOKEN", 
-        xsrfCookieName: "csrftoken" 
-        })
-        )
+        return (axios.patch(API_URL + '?tag=' + tag, changes, config))
     }
 }
 

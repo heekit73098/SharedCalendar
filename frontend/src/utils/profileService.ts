@@ -1,55 +1,40 @@
 import axios from "axios";
 
 const API_URL = "http://localhost:8000/api/"
+const config = {
+    withCredentials:true,
+    xsrfHeaderName:"X-CSRFTOKEN", 
+    xsrfCookieName: "csrftoken" 
+}
 
 class ProfileService {
     getProfile() {
         return (
-            axios.get(API_URL + "profile/", {
-                withCredentials:true,
-                xsrfHeaderName:"X-CSRFTOKEN", 
-                xsrfCookieName: "csrftoken" 
-            })
+            axios.get(API_URL + "profile/", config)
         )
     }
 
     addCalendar(event: {}) {
         return (
-            axios.post(API_URL + "calendarConfig/", event, { 
-                withCredentials:true, 
-                xsrfHeaderName:"X-CSRFTOKEN", 
-                xsrfCookieName: "csrftoken" 
-            })
+            axios.post(API_URL + "calendarConfig/", event, config)
         )
     }
 
     getCalendars() {
         return (
-            axios.get(API_URL + "calendarConfig/", {
-                withCredentials:true, 
-                xsrfHeaderName:"X-CSRFTOKEN", 
-                xsrfCookieName: "csrftoken" 
-            })
+            axios.get(API_URL + "calendarConfig/", config)
         )
     }
 
     changeColors(data: {}) {
         return (
-            axios.post(API_URL + "color/", data, {
-                withCredentials:true, 
-                xsrfHeaderName:"X-CSRFTOKEN", 
-                xsrfCookieName: "csrftoken" 
-            })
+            axios.post(API_URL + "color/", data, config)
         )
     }
 
     getColors() {
         return (
-            axios.get(API_URL + "color/", {
-                withCredentials:true, 
-                xsrfHeaderName:"X-CSRFTOKEN", 
-                xsrfCookieName: "csrftoken" 
-            })
+            axios.get(API_URL + "color/", config)
         )
     }
 }

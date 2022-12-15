@@ -1,6 +1,11 @@
 import axios from "axios";
 
 const API_URL = "http://localhost:8000/api/"
+const config = {
+  withCredentials:true,
+  xsrfHeaderName:"X-CSRFTOKEN", 
+  xsrfCookieName: "csrftoken" 
+}
 
 class AuthService {
   login(username: string, password: string) {
@@ -8,27 +13,12 @@ class AuthService {
       .post(API_URL + "login/", {
         username,
         password
-      }, {
-        withCredentials:true,
-        xsrfHeaderName:"X-CSRFTOKEN", 
-        xsrfCookieName: "csrftoken" 
-      })
-      .then(response => {
-        console.log(response)
-      });
+      }, config)
   }
 
   logout() {
     return axios
-      .post(API_URL + "logout/", {}
-      , {
-        withCredentials:true,
-        xsrfHeaderName:"X-CSRFTOKEN", 
-        xsrfCookieName: "csrftoken" 
-      })
-      .then(response => {
-        console.log(response)
-      });
+      .post(API_URL + "logout/", {}, config)
   }
 
   register(email: string, password: string, first_name: string, last_name: string) {
@@ -42,17 +32,13 @@ class AuthService {
   }
 
   getUser() {
-    return axios.get(API_URL)
+    return axios.get(API_URL + "session/", config)
   }
 
   changePassword(password: string){
     return axios.post(API_URL + "profile/", {
       password
-    }, {
-      withCredentials:true,
-      xsrfHeaderName:"X-CSRFTOKEN", 
-      xsrfCookieName: "csrftoken" 
-    })
+    }, config)
   }
 
 }

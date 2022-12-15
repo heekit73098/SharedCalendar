@@ -6,6 +6,7 @@ import * as Yup from "yup";
 
 import AuthService from "../utils/authService";
 import { useNavigate } from "react-router-dom";
+import NavBar from "./NavBar";
 
 export default function Register() {
   const [successful, setSuccessful] = useState(false)
@@ -71,6 +72,7 @@ export default function Register() {
 
   return (
     <div className="col-md-12">
+      <NavBar />
       <div className="card card-container">
 
         <Formik

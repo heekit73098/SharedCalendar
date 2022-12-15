@@ -53,24 +53,6 @@ function CalendarComponent({ view }: { view: ViewType }) {
   const [calendars, setCalendars] = useState<Options['calendars']>([])
   const [filteredCalendars, setFilteredCalendars] = useState<Options['calendars']>([])
   const [applyToAll, setApplyToAll] = useState(false)
-  const [loaded, setLoaded] = useState(false)
-  const initialCalendars: Options['calendars'] = [
-    {
-      id: '0',
-      name: 'Private',
-      backgroundColor: '#9e5fff',
-      borderColor: '#9e5fff',
-      dragBackgroundColor: '#9e5fff',
-    },
-    {
-      id: '1',
-      name: 'Company',
-      backgroundColor: '#00a9ff',
-      borderColor: '#00a9ff',
-      dragBackgroundColor: '#00a9ff',
-    },
-  ];
-
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
@@ -125,10 +107,7 @@ function CalendarComponent({ view }: { view: ViewType }) {
   }, [selectedView, updateRenderRangeText]);
 
   useEffect(() => {
-    if (refreshFilteredEvents(events)){
-      setLoaded(true)
-    }
-    
+    refreshFilteredEvents(events)
   }, [filteredCalendars, setFilteredCalendars, events, setEvents])
 
   useEffect(() => {
@@ -141,33 +120,28 @@ function CalendarComponent({ view }: { view: ViewType }) {
         })
       });
       ProfileService.getColors().then(res => {
-        
         calendarArray?.forEach((calendar) => {
           var index = res.data.findIndex(function(c: { [x: string]: string; }) {
             return c["calendarID"] === calendar.id
           });
-          calendar.backgroundColor = res.data[index]["color"]
-          calendar.borderColor = res.data[index]["color"]
-          calendar.dragBackgroundColor = res.data[index]["color"]
+          if (index >= 0) {
+            calendar.backgroundColor = res.data[index]["color"]
+            calendar.borderColor = res.data[index]["color"]
+            calendar.dragBackgroundColor = res.data[index]["color"]
+          }
         })
         setCalendars(calendarArray)
         setFilteredCalendars(calendarArray)
         refreshEvents()
       }).catch((err) => {
-        console.log(err.response.status)
-        if (err.response.status == 403) {
-          navigate("/login")
-        } else {
-          console.log(err)
-      }
+        if (err.response.status === 403) {
+          navigate("/")
+        } 
       })
     }).catch((err) => {
-      console.log(err.response.status)
-      if (err.response.status == 403) {
-        navigate("/login")
-      } else {
-        console.log(err)
-    }
+      if (err.response.status === 403) {
+        navigate("/")
+      } 
     })
   }, [])
 
@@ -204,11 +178,8 @@ function CalendarComponent({ view }: { view: ViewType }) {
       setEvents(res.data)
     })
     .catch((err) => {
-      console.log(err.response.status)
-      if (err.response.status == 403) {
-        navigate("/login")
-      } else {
-        console.log(err)
+      if (err.response.status === 403) {
+        navigate("/")
       }
     });
   }
@@ -219,7 +190,7 @@ function CalendarComponent({ view }: { view: ViewType }) {
 
   function filterCalendars(event: { target: { checked: boolean; value: string; }; }) {
     if (event.target.checked) {
-      if (!filteredCalendars?.some(e => e.id == event.target.value)) {
+      if (!filteredCalendars?.some(e => e.id === event.target.value)) {
         if (filteredCalendars && calendars?.find(x => x.id === event.target.value)){
           setFilteredCalendars([...filteredCalendars,calendars?.find(x => x.id === event.target.value)!])
         }else{
@@ -391,7 +362,7 @@ function CalendarComponent({ view }: { view: ViewType }) {
         <tbody>
           {calendars?.map(item => {
                       return (
-                          <tr><td><label key={item.id}>{item.name}</label></td><td><input key={item.id} type="checkbox" id={item.id} value={item.id} defaultChecked={true} onChange={filterCalendars} /></td></tr>
+                          <tr key={item.id}><td><label>{item.name}</label></td><td><input type="checkbox" id={item.id} value={item.id} defaultChecked={true} onChange={filterCalendars} /></td></tr>
                       );
                       })}
         </tbody>

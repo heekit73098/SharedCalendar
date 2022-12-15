@@ -4,6 +4,7 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
 import AuthService from "../utils/authService";
+import NavBar from "./NavBar";
 
 export default function Login() {
   const [redirect, setRedirect] = useState("")
@@ -24,7 +25,7 @@ export default function Login() {
     setLoading(true)
 
     AuthService.login(username, password).then(
-      (res) => {
+      async (res) => {
         setRedirect("/calendar")
       },
       error => {
@@ -43,6 +44,7 @@ export default function Login() {
 
     return (
       <div className="col-md-12">
+        <NavBar />
         <div className="card card-container">
 
           <Formik
@@ -90,7 +92,7 @@ export default function Login() {
             </Form>
           </Formik>
         </div>
-        <div>
+        {/* <div>
           <button
             type="button"
             className="btn btn-primary btn-block"
@@ -99,7 +101,7 @@ export default function Login() {
           >
             Register
           </button>
-        </div>
+        </div> */}
       </div>
     );
   }

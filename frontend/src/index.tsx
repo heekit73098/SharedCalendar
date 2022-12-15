@@ -11,6 +11,7 @@ import '@toast-ui/calendar/toastui-calendar.css';
 import 'tui-date-picker/dist/tui-date-picker.min.css';
 import 'tui-time-picker/dist/tui-time-picker.min.css';
 import 'bootstrap/dist/css/bootstrap-sketchy.min.css';
+import Home from './components/Home';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -20,7 +21,7 @@ root.render(
   <React.StrictMode>
     <BrowserRouter>
     <Routes>
-          <Route path="/" element={<CalendarComponent view={'month'} />}/>
+          <Route path="/" element={<Home />}/>
           <Route path="/calendar" element={<CalendarComponent view={'month'} />}/>
           <Route path="/login" element={<Login />}/>
           <Route path="/register" element={<Register />}/>

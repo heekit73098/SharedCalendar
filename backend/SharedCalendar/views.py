@@ -200,7 +200,8 @@ class ProfileView(APIView):
         user = get_user(request)
         return JsonResponse({
             'email': user.get_username(),
-            'full_name': user.get_full_name()
+            'full_name': user.get_full_name(),
+            'first_name': user.get_short_name()
         }, status=status.HTTP_200_OK)
     def post(self, request):
         user = get_user(request)
