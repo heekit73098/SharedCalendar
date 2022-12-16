@@ -34,7 +34,7 @@ export default function Register() {
   }
 
   function handleRegister(formValue: { email: string; password: string; first_name: string; last_name: string; passwordVal: string }) {
-    const { email, password, first_name, last_name, passwordVal } = formValue;
+    const { email, password, first_name, last_name } = formValue;
 
     setMessage("")
     setSuccessful(false)
@@ -73,7 +73,7 @@ export default function Register() {
   return (
     <div className="col-md-12">
       <NavBar />
-      <div className="card card-container">
+      <div className="card card-container" style={{paddingTop:75}}>
 
         <Formik
           initialValues={initialValues}

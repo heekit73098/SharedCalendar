@@ -45,7 +45,7 @@ export default function Login() {
     return (
       <div className="col-md-12">
         <NavBar />
-        <div className="card card-container">
+        <div className="card card-container" style={{paddingTop:75}}>
 
           <Formik
             initialValues={initialValues}
@@ -54,7 +54,7 @@ export default function Login() {
           >
             <Form>
               <div className="form-group">
-                <label htmlFor="username">Username/Email</label>
+                <label htmlFor="username">Email</label>
                 <Field name="username" type="text" className="form-control" />
                 <ErrorMessage
                   name="username"

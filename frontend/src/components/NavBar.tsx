@@ -28,7 +28,7 @@ export default function NavBar() {
 
     if (authenticated) {
       return (
-        <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
+        <Navbar sticky="top" collapseOnSelect expand="lg" bg="dark" variant="dark">
           <Container>
             <Navbar.Brand href="/">Futurum</Navbar.Brand>
             <Navbar.Toggle aria-controls="responsive-navbar-nav" />
@@ -47,7 +47,7 @@ export default function NavBar() {
       );
     } else {
       return (
-        <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
+        <Navbar fixed="top" collapseOnSelect expand="lg" bg="dark" variant="dark">
           <Container>
             <Navbar.Brand href="/">Futurum</Navbar.Brand>
             <Navbar.Toggle aria-controls="responsive-navbar-nav" />

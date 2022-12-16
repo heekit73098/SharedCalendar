@@ -10,6 +10,7 @@ import CalendarService from "../utils/calendarService"
 import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import ProfileService from '../utils/profileService';
+import { Alert } from 'react-bootstrap';
 
 type ViewType = 'month' | 'week' | 'day';
 type CalendarEvent = {
@@ -53,6 +54,8 @@ function CalendarComponent({ view }: { view: ViewType }) {
   const [calendars, setCalendars] = useState<Options['calendars']>([])
   const [filteredCalendars, setFilteredCalendars] = useState<Options['calendars']>([])
   const [applyToAll, setApplyToAll] = useState(false)
+  const [alert, setAlert] = useState(false)
+  const [message, setMessage] = useState("")
 
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
@@ -135,12 +138,12 @@ function CalendarComponent({ view }: { view: ViewType }) {
         refreshEvents()
       }).catch((err) => {
         if (err.response.status === 403) {
-          navigate("/")
+          navigate("/", { state: "Hello World!" })
         } 
       })
     }).catch((err) => {
       if (err.response.status === 403) {
-        navigate("/")
+        navigate("/", { state: "Hello World!" })
       } 
     })
   }, [])
@@ -179,7 +182,7 @@ function CalendarComponent({ view }: { view: ViewType }) {
     })
     .catch((err) => {
       if (err.response.status === 403) {
-        navigate("/")
+        navigate("/", { state: "Hello World!" })
       }
     });
   }
@@ -293,6 +296,11 @@ function CalendarComponent({ view }: { view: ViewType }) {
       });
       CalendarService.createEvents(events).then((res) => refreshEvents());
     } else {
+      if (!eventData.calendarId) {
+        setMessage("No Calendar Chosen!")
+        setAlert(true)
+        return
+      }
       const event = {
         calendarId: eventData.calendarId || '',
         id: "",
@@ -369,25 +377,25 @@ function CalendarComponent({ view }: { view: ViewType }) {
       </table>
       
       <Calendar
-        height="600px"
+        height="800px"
         calendars={filteredCalendars}
-        month={{ startDayOfWeek: 1 }}
+        month={{ startDayOfWeek: 0 }}
         events={filteredEvents}
-        // template={{
-        //   milestone(event) {
-        //     return `<span style="color: #fff; background-color: ${event.backgroundColor};">${event.title}</span>`;
-        //   },
-        //   allday(event) {
-        //     return `[All day] ${event.title}`;
-        //   },
-        // }}
+        template={{
+          milestone(event) {
+            return `<span style="color: #fff; background-color: ${event.backgroundColor};">${event.title}</span>`;
+          },
+          allday(event) {
+            return `[All day] ${event.title}`;
+          },
+        }}
         theme={theme}
         useDetailPopup={true}
         useFormPopup={true}
         view={selectedView}
         week={{
           eventView: true,
-          taskView: true,
+          taskView: false,
         }}
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
@@ -399,6 +407,9 @@ function CalendarComponent({ view }: { view: ViewType }) {
         onBeforeUpdateEvent={onBeforeUpdateEvent}
         onBeforeCreateEvent={onBeforeCreateEvent}
       />
+      <Alert show={alert} variant={"danger"} onClose={() => setAlert(false)} dismissible>
+          {message}
+      </Alert>
     </div>
   );
 }
