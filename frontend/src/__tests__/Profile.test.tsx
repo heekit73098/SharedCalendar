@@ -19,10 +19,6 @@ test('renders base layout of profile', async () => {
   axiosMock.onGet('http://localhost:8000/api/calendarConfig/').reply(200, Constants.GET_CALENDAR_BODY);
 
   const renderer = await act(async () => render(<Profile />))
-  const submitElement = await waitFor(() =>
-    renderer.getByText("Submit")
-  );
-  expect(submitElement).toBeInTheDocument();
   const emailElement = await waitFor(() =>
     renderer.getByText("Email:")
   );
@@ -31,14 +27,6 @@ test('renders base layout of profile', async () => {
     renderer.getByText("Name:")
   );
   expect(nameElement).toBeInTheDocument();
-  const changesElement = await waitFor(() =>
-    renderer.getByText("Change")
-  );
-  expect(changesElement).toBeInTheDocument();
-  const cfmChangesElement = await waitFor(() =>
-    renderer.getByText("Confirm Changes")
-  );
-  expect(cfmChangesElement).toBeInTheDocument();
 });
 
 test('renders retrieval profile detail', async () => {

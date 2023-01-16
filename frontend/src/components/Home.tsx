@@ -26,7 +26,7 @@ export default function Home() {
         return <Navigate to={"/calendar"}/>
     } else {
         return (
-            <div>
+            <div className="home-body">
                 <NavBar />
                 <div style={{paddingTop:75}}>
                     <h1>Welcome to Futurum </h1>

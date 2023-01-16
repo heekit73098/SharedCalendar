@@ -6,6 +6,8 @@ import * as Yup from "yup";
 import AuthService from "../utils/authService";
 import NavBar from "./NavBar";
 
+import "../assets/Login.css"
+
 export default function Login() {
   const [redirect, setRedirect] = useState("")
   const [loading, setLoading] = useState(false)
@@ -45,7 +47,7 @@ export default function Login() {
     return (
       <div className="col-md-12">
         <NavBar />
-        <div className="card card-container" style={{paddingTop:75}}>
+        <div className="login-form">
 
           <Formik
             initialValues={initialValues}
@@ -92,16 +94,6 @@ export default function Login() {
             </Form>
           </Formik>
         </div>
-        {/* <div>
-          <button
-            type="button"
-            className="btn btn-primary btn-block"
-            data-action="move-today"
-            onClick={() => navigate("/register")}
-          >
-            Register
-          </button>
-        </div> */}
       </div>
     );
   }

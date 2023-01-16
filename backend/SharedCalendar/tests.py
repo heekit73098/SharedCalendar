@@ -11,8 +11,7 @@ class TestEvent(TestCase):
     @classmethod
     def setUpTestData(cls) -> None:
         for i in range(5):
-            Event.objects.create(
-                calendarId = "0",
+            obj = Event.objects.create(
                 id = str(i),
                 title = "test" + str(i),
                 isAllday = False,
@@ -26,7 +25,6 @@ class TestEvent(TestCase):
     def test_create_same_id_failure(self):
         try:
             Event.objects.create(
-                calendarId = "0",
                 id = "0",
                 title = "test0",
                 isAllday = False,
@@ -59,6 +57,7 @@ class TestCalendar(TestCase):
             User.objects.create(
                 username = str(i),
                 password = str(i) * 8,
+                email = str(i) + "@" + str(i) + ".com"
 
             )
         for i in range(5):

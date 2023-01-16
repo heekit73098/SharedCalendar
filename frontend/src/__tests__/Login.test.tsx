@@ -11,7 +11,7 @@ jest.mock('react-router-dom', () => ({
 test('renders login layout', async () => {
     const renderer = await act(async () => render(<Login />))
     const usernameElement = await waitFor(() =>
-        renderer.getByText("Username/Email")
+        renderer.getByText("Email")
     );
     expect(usernameElement).toBeInTheDocument();
 

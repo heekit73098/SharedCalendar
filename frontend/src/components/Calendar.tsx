@@ -18,14 +18,23 @@ type CalendarEvent = {
   id: string; 
   title: string | undefined; 
   isAllday: boolean | undefined; 
-  start: string | undefined; 
-  end: string | undefined; 
+  start: Date; 
+  end: Date; 
   category: string; 
   dueDateClass: string; 
   location: string | undefined; 
   state: string | undefined; 
   isPrivate: boolean | undefined; 
-  tag:string
+  tag: string;
+  attendees: string[];
+}
+
+type CalendarData = {
+  'calendarID': string,
+  'groupName': string,
+  'isPersonal': boolean,
+  'isAnonymous': boolean,
+  'journals': string[][]
 }
 
 
@@ -49,11 +58,10 @@ function CalendarComponent({ view }: { view: ViewType }) {
   const calendarRef = useRef<typeof CalendarComponent>(null);
   const [selectedDateRangeText, setSelectedDateRangeText] = useState('');
   const [selectedView, setSelectedView] = useState(view);
-  const [events, setEvents] = useState<never[]>([])
-  const [filteredEvents, setFilteredEvents] = useState<never[]>([])
+  const [events, setEvents] = useState<CalendarEvent[]>([])
+  const [filteredEvents, setFilteredEvents] = useState<CalendarEvent[]>([])
   const [calendars, setCalendars] = useState<Options['calendars']>([])
   const [filteredCalendars, setFilteredCalendars] = useState<Options['calendars']>([])
-  const [applyToAll, setApplyToAll] = useState(false)
   const [alert, setAlert] = useState(false)
   const [message, setMessage] = useState("")
 
@@ -70,32 +78,57 @@ function CalendarComponent({ view }: { view: ViewType }) {
     const viewName = calInstance.getViewName();
     const calDate = calInstance.getDate();
     const rangeStart = calInstance.getDateRangeStart();
-    const rangeEnd = calInstance.getDateRangeEnd();
 
     let year = calDate.getFullYear();
-    let month = calDate.getMonth() + 1;
+    let month = calDate.getMonth();
     let date = calDate.getDate();
     let dateRangeText: string;
-
     switch (viewName) {
       case 'month': {
-        dateRangeText = `${month}/${year}`;
+        let d = new Date()
+        d.setMonth(month)
+        d.setFullYear(year)
+        dateRangeText = d.toLocaleDateString('en-SG', {
+          month: "long",
+          year: "numeric"
+        })
         break;
       }
       case 'week': {
-        year = rangeStart.getFullYear();
-        month = rangeStart.getMonth() + 1;
-        date = rangeStart.getDate();
-        const endMonth = rangeEnd.getMonth() + 1;
-        const endDate = rangeEnd.getDate();
+        let startYear = rangeStart.getFullYear();
+        let startMonth = rangeStart.getMonth();
+        let startDay = rangeStart.getDate();
 
-        const start = `${date < 10 ? '0' : ''}${date}/${month < 10 ? '0' : ''}${month}/${year}`;
-        const end = `${endDate < 10 ? '0' : ''}${endDate}/${endMonth < 10 ? '0' : ''}${endMonth}/${year}`;
-        dateRangeText = `${start} - ${end}`;
+        let startDate = new Date()
+        startDate.setDate(startDay)
+        startDate.setMonth(startMonth)
+        startDate.setFullYear(startYear)
+        let startDateText = startDate.toLocaleDateString("en-SG", {
+          day: "numeric",
+          month: "short",
+          year: "numeric"
+        })
+
+        let endDate = new Date()
+        endDate.setDate(startDate.getDate() + 6)
+        let endDateText = endDate.toLocaleDateString("en-SG", {
+          day: "numeric",
+          month: "short",
+          year: "numeric"
+        })
+        dateRangeText = `${startDateText} - ${endDateText}`;
         break;
       }
       default:
-        dateRangeText = `${date}/${month}/${year}`;
+        let d = new Date()
+        d.setMonth(month)
+        d.setFullYear(year)
+        d.setDate(date)
+        dateRangeText = d.toLocaleDateString('en-SG', {
+          day: "numeric",
+          month: "short",
+          year: "numeric"
+        })
     }
 
     setSelectedDateRangeText(dateRangeText);
@@ -116,10 +149,10 @@ function CalendarComponent({ view }: { view: ViewType }) {
   useEffect(() => {
     ProfileService.getCalendars().then(res => {
       var calendarArray: Options['calendars'] = []
-      res.data.forEach((calendar: string[]) => {
+      res.data.forEach((calendar: CalendarData) => {
         calendarArray?.push({
-          id: calendar[0],
-          name: calendar[1]
+          id: calendar['calendarID'],
+          name: calendar['groupName'],
         })
       });
       ProfileService.getColors().then(res => {
@@ -138,21 +171,25 @@ function CalendarComponent({ view }: { view: ViewType }) {
         refreshEvents()
       }).catch((err) => {
         if (err.response.status === 403) {
-          navigate("/", { state: "Hello World!" })
+          navigate("/", { state: "Please Login First!" })
         } 
       })
     }).catch((err) => {
       if (err.response.status === 403) {
-        navigate("/", { state: "Hello World!" })
+        navigate("/", { state: "Please Login First!" })
       } 
     })
   }, [])
 
-  function refreshFilteredEvents(array: never[]): boolean {
+  function refreshFilteredEvents(array: CalendarEvent[]): boolean {
     if (!(events.length && filteredCalendars?.length)) {
       setFilteredEvents([])
       return false
     }
+    array.sort(function (a, b) {
+      return a.calendarId.charCodeAt(0) - b.calendarId.charCodeAt(0);
+    });
+    console.log(array)
     array = array.filter((event: { calendarId: string; }) => {
       return (filteredCalendars!.map(a => a.id).includes(event.calendarId));
     })
@@ -167,28 +204,50 @@ function CalendarComponent({ view }: { view: ViewType }) {
   function refreshEvents() {
     CalendarService.refreshList()
     .then((res)=>{
+      let retrievedEvents: CalendarEvent[] = []
       res.data.forEach((event: {
-        attendees: string[];
-        owner: string; 
+        id: string;
+        title: string | undefined;
+        isAllday: boolean | undefined;
+        category: string;
+        dueDateClass: string;
+        location: string | undefined;
+        state: string | undefined;
+        isPrivate: boolean | undefined;
+        calendarID: string[];
+        attendee: string; 
         start: Date; 
         end: Date; 
         tag: string;
       }) => {
-          event.start = new Date(event.start);
-          event.end = new Date(event.end);
-          event.attendees = [event.owner]
+        event.calendarID.forEach(calendarID => {
+          const e: CalendarEvent = {
+            calendarId: calendarID,
+            id: event.id,
+            title: calendarID[0] === "C" ? "Busy" : event.title,
+            isAllday: event.isAllday,
+            start: new Date(event.start),
+            end: new Date(event.end),
+            category: event.category,
+            dueDateClass: event.dueDateClass,
+            location: event.location,
+            state: event.state,
+            isPrivate: event.isPrivate,
+            tag: event.tag,
+            attendees: [event.attendee],
+          }
+          retrievedEvents.push(e)
+        });
       });
-      setEvents(res.data)
+      console.log(retrievedEvents)
+      setEvents(retrievedEvents)
     })
     .catch((err) => {
+      console.log(err)
       if (err.response.status === 403) {
-        navigate("/", { state: "Hello World!" })
+        navigate("/", { state: "Please Login First!" })
       }
     });
-  }
-
-  function handleChecked() {
-    setApplyToAll(!applyToAll)
   }
 
   function filterCalendars(event: { target: { checked: boolean; value: string; }; }) {
@@ -244,11 +303,7 @@ function CalendarComponent({ view }: { view: ViewType }) {
     console.log('Event Info : ', res.title);
     console.groupEnd();
 
-    var index = events.findIndex(function(event) {
-      return event["id"] === res.id
-    });
-    var tag = events[index]["tag"]
-    CalendarService.deleteEvent(tag).then((res) => refreshEvents());
+    CalendarService.deleteEvent(res.id).then((res) => refreshEvents());
   };
 
 
@@ -268,57 +323,32 @@ function CalendarComponent({ view }: { view: ViewType }) {
 
     const targetEvent = updateData.event;
     const changes = { ...updateData.changes };
-    var index = events.findIndex(function(event) {
-      return event["id"] === targetEvent.id
-    });
-    var tag = events[index]["tag"]
-    CalendarService.updateEvent(tag, changes).then((res) => refreshEvents());
+
+    CalendarService.updateEvent(targetEvent.id, changes).then((res) => refreshEvents());
   };
 
   const onBeforeCreateEvent: ExternalEventTypes['beforeCreateEvent'] = (eventData) => {
-    if (applyToAll) {
-      var events: CalendarEvent[] = []
-      calendars?.forEach(calendar => {
-        events.push({
-          calendarId: calendar.id || '',
-          id: "",
-          title: eventData.title,
-          isAllday: eventData.isAllday,
-          start: eventData.start?.toString(),
-          end: eventData.end?.toString(),
-          category: eventData.isAllday ? 'allday' : 'time',
-          dueDateClass: '',
-          location: eventData.location,
-          state: eventData.state,
-          isPrivate: eventData.isPrivate,
-          tag: ''
-        })
-      });
-      CalendarService.createEvents(events).then((res) => refreshEvents());
-    } else {
-      if (!eventData.calendarId) {
-        setMessage("No Calendar Chosen!")
-        setAlert(true)
-        return
-      }
-      const event = {
-        calendarId: eventData.calendarId || '',
-        id: "",
-        title: eventData.title,
-        isAllday: eventData.isAllday,
-        start: eventData.start?.toString(),
-        end: eventData.end?.toString(),
-        category: eventData.isAllday ? 'allday' : 'time',
-        dueDateClass: '',
-        location: eventData.location,
-        state: eventData.state,
-        isPrivate: eventData.isPrivate,
-        tag: ''
-      };
-      CalendarService.createEvent(event).then((res) => refreshEvents());
+    if (!eventData.calendarId) {
+      setMessage("No Calendar Chosen!")
+      setAlert(true)
+      return
     }
-    
-  };
+    const event = {
+      calendarID: eventData.calendarId || '',
+      id: "",
+      title: eventData.title,
+      isAllday: eventData.isAllday,
+      start: eventData.start?.toString(),
+      end: eventData.end?.toString(),
+      category: eventData.isAllday ? 'allday' : 'time',
+      dueDateClass: '',
+      location: eventData.location,
+      state: eventData.state,
+      isPrivate: eventData.isPrivate,
+      tag: ''
+    };
+    CalendarService.createEvent(event).then((res) => refreshEvents());
+  }
 
   return (
     <div>
@@ -358,26 +388,23 @@ function CalendarComponent({ view }: { view: ViewType }) {
             Next
           </button>
         </span>
-        <span>
-          <label>
-            Add to all Calendars? <input type="checkbox" checked={applyToAll} onChange={handleChecked}/>
-          </label>
-        </span>
-        <br></br>
         <span className="render-range">{selectedDateRangeText}</span>
       </div>
       <table>
         <tbody>
           {calendars?.map(item => {
                       return (
-                          <tr key={item.id}><td><label>{item.name}</label></td><td><input type="checkbox" id={item.id} value={item.id} defaultChecked={true} onChange={filterCalendars} /></td></tr>
+                          <tr key={item.id}>
+                            <td><label>{item.name}</label></td>
+                            <td><input type="checkbox" id={item.id} value={item.id} defaultChecked={true} onChange={filterCalendars} /></td>
+                          </tr>
                       );
                       })}
         </tbody>
       </table>
       
       <Calendar
-        height="800px"
+        height="750px"
         calendars={filteredCalendars}
         month={{ startDayOfWeek: 0 }}
         events={filteredEvents}

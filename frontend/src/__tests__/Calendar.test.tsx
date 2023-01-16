@@ -17,6 +17,7 @@ test('renders base layout of calendars', async () => {
   axiosMock.onGet('http://localhost:8000/api/calendar/').reply(200, Constants.GET_EVENTS_BODY);
   axiosMock.onGet('http://localhost:8000/api/color/').reply(200, Constants.GET_COLOR_BODY);
   axiosMock.onGet('http://localhost:8000/api/calendarConfig/').reply(200, Constants.GET_CALENDAR_BODY);
+  axiosMock.onGet('http://localhost:8000/api/profile/').reply(200, Constants.GET_PROFILE_BODY);
 
   const renderer = await act(async () => render(<CalendarComponent view={'month'} />))
   const prevElement = await waitFor(() =>
@@ -39,6 +40,7 @@ test('renders test calendars', async () => {
   axiosMock.onGet('http://localhost:8000/api/calendar/').reply(200, Constants.GET_EVENTS_BODY);
   axiosMock.onGet('http://localhost:8000/api/color/').reply(200, Constants.GET_COLOR_BODY);
   axiosMock.onGet('http://localhost:8000/api/calendarConfig/').reply(200, Constants.GET_CALENDAR_BODY);
+  axiosMock.onGet('http://localhost:8000/api/profile/').reply(200, Constants.GET_PROFILE_BODY);
 
   const renderer = await act(async () => render(<CalendarComponent view={'month'} />))
   const calendarElement_one = await waitFor(() =>

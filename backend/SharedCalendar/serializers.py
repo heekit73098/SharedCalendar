@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Calendar, Event, CalendarColor
+from .models import Calendar, Event, CalendarColor, JournalEntry
 from rest_framework.validators import UniqueValidator
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
@@ -7,7 +7,7 @@ from django.contrib.auth import authenticate
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
         model = Event
-        fields = ('calendarId', 'id', 'title', 'isAllday', 'start', 'end', 'category', 'dueDateClass', 'location', 'state', 'isPrivate', 'tag', 'owner')
+        fields = ('calendarID', 'id', 'title', 'isAllday', 'start', 'end', 'category', 'dueDateClass', 'location', 'state', 'isPrivate', 'tag', 'owner', 'attendee')
 
 class CalendarColorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,9 +16,9 @@ class CalendarColorSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(
-            required=True,
-            validators=[UniqueValidator(queryset=User.objects.all())]
-            )
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())]
+    )
     first_name = serializers.CharField()
     last_name = serializers.CharField()
     password = serializers.CharField(min_length=8, write_only=True)
@@ -74,4 +74,8 @@ class LoginSerializer(serializers.Serializer):
 class CalendarSerializer(serializers.Serializer):
     class Meta:
         model = Calendar
-        fields = ("calendarID", "name")
+        fields = ("calendarID", "name", "isPersonal", "isAnonymous", "journals")
+
+class JournalEntrySerializer(serializers.Serializer):
+    class Meta:
+        model = JournalEntry

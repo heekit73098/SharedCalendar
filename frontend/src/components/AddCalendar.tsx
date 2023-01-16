@@ -1,17 +1,23 @@
 import { Formik, ErrorMessage, Field, Form } from "formik";
 import { useEffect, useState } from "react";
 import ProfileService from "../utils/profileService";
-import * as Yup from "yup";
 import ColorPicker from "./ColorPicker";
+import { Tooltip } from 'react-tooltip';
+import "../assets/AddCalendar.css"
 
 export default function AddCalendar() {
     const [calendars, setCalendars] = useState([])
     const [colorDict, setColorDict] = useState({})
     const [colors, setColors] = useState({})
     const [loaded, setLoaded] = useState(false)
+    const popup = `Note:<ol>
+    <li>You must use the unique group ID to join a group.</li>
+    <li>Your Personal Calendar is not shareable to anyone!
+    <li>Creating a new group will share all of your event details with your group members.</li>
+    <li>Creating an anonymous group will only reveal your unavailable timings to the group members.</li>
+    </ol>`
 
     function addCalendar(formValue: {choice: string, field: string}) {
-        console.log(formValue.choice)
         ProfileService.addCalendar(formValue);
         ProfileService.getCalendars().then(res => {
             setCalendars(res.data)
@@ -52,18 +58,18 @@ export default function AddCalendar() {
             <table>
                 <thead>
                     <tr>
-                    <th>Calendar ID</th>
-                    <th>Calendar Name</th>
+                    <th>Group ID</th>
+                    <th>Group Name</th>
                     <th>Colour</th>
                     </tr>
                 </thead>
                 <tbody>
                     {calendars.map(item => {
                     return (
-                        <tr key={item[0]}>
-                        <td>{ item[0]}</td>
-                        <td>{ item[1] }</td>
-                        <td><ColorPicker calID={item[0]} originalColor={colors[item[0]]} selected={handleChange}/></td>
+                        <tr key={item['calendarID']}>
+                        <td>{ item['calendarID']}</td>
+                        <td>{ item['groupName'] }</td>
+                        <td><ColorPicker calID={item['calendarID']} originalColor={colors[item['calendarID']]} selected={handleChange}/></td>
                         </tr>
                     );
                     })}
@@ -76,11 +82,13 @@ export default function AddCalendar() {
             <Formik initialValues={{choice:"join", field:""}} onSubmit={addCalendar}> 
                 <Form>
                     <Field as="select" name="choice">
-                        <option value="join">Join An Existing Calendar</option>
-                        <option value="create">Create A New Calendar</option>
-                    </Field>
+                        <option value="join">Join An Existing Group</option>
+                        <option value="create">Create A New Group</option>
+                        <option value="create">Create A New Anonymous Group</option>
+                    </Field> 
+                    <a id="props-basic"><span>&#9432;</span> </a> <Tooltip anchorId="props-basic" html={popup} />
                     <div className="form-group">
-                        <Field id="form-field" name="field" type="text" className="form-control" placeholder="Enter Calendar Name To Create / Enter 6-Digit ID To Join" />
+                        <Field id="form-field" name="field" type="text" className="form-control" placeholder="Enter Group Name To Create / Enter 6-Digit ID To Join A Group" />
                         <button type="submit" className="btn btn-primary btn-block">Submit</button>
                         <ErrorMessage name="field" component="div" className="alert alert-danger" />
                     </div>

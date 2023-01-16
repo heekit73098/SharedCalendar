@@ -1,7 +1,8 @@
+import json
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework import viewsets, status, permissions
-from .serializers import EventSerializer, UserSerializer, LoginSerializer, CalendarColorSerializer
-from .models import Calendar, Event, CalendarColor
+from .serializers import EventSerializer, UserSerializer, LoginSerializer, CalendarColorSerializer, JournalEntrySerializer
+from .models import Calendar, Event, CalendarColor, Journal, JournalEntry
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -12,6 +13,7 @@ from django.db.utils import IntegrityError
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
+from django.core import serializers
 import string
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 import threading
@@ -42,43 +44,53 @@ class EventView(APIView):
         user = get_user(request)
         serializer_class = EventSerializer
         calendars = user.calendar_set.values_list('calendarID')
-        queryset = Event.objects.filter(calendarId__in=calendars)
-        data = serializer_class(queryset, many=True).data
-        return Response(data, status=status.HTTP_200_OK)
-        
-
+        compiledData = []
+        queryset = Event.objects.filter(calendarID__in=calendars)
+        compiledData = serializer_class(queryset, many=True).data   
+        return Response(compiledData, status=status.HTTP_200_OK)
+    
     def post(self, request):
-        name = get_user(request).get_short_name()
-        while not request.data["id"]:
-            newID = get_random_string(6, allowed_chars=string.ascii_uppercase + string.digits)
-            if not Event.objects.filter(pk=newID).exists():
-                request.data["id"] = newID
-                request.data["tag"] = newID
-        Event.objects.create(
-            calendarId = request.data["calendarId"],
-            id = request.data["id"],
-            title = request.data["title"],
-            isAllday = request.data["isAllday"],
-            start = request.data["start"],
-            end = request.data["end"],
-            category = request.data["category"],
-            dueDateClass = request.data["dueDateClass"],
-            location = request.data["location"],
-            state = request.data["state"],
-            isPrivate = request.data["isPrivate"],
-            tag = request.data["tag"],
-            owner = name
-        )
-        return Response(None, status=status.HTTP_201_CREATED)
+        targetCalendar = Calendar.objects.get(calendarID=request.data["calendarID"])
+        members = targetCalendar.users.all()
+        while True:
+            newTag = get_random_string(6, allowed_chars=string.ascii_uppercase + string.digits)
+            if not Event.objects.filter(tag = newTag).exists():
+                break
+        for member in members:
+            request.data["id"] = ""
+            while not request.data["id"]:
+                newID = get_random_string(6, allowed_chars=string.ascii_uppercase + string.digits)
+                if not Event.objects.filter(pk=newID).exists():
+                    request.data["id"] = newID
+                    request.data["tag"] = newTag
+            event = Event.objects.create(
+                id = request.data["id"],
+                title = request.data["title"],
+                isAllday = request.data["isAllday"],
+                start = request.data["start"],
+                end = request.data["end"],
+                category = request.data["category"],
+                dueDateClass = request.data["dueDateClass"],
+                location = request.data["location"],
+                state = request.data["state"],
+                isPrivate = request.data["isPrivate"],
+                tag = request.data["tag"],
+                owner = member.get_username(),
+                attendee = member.get_short_name()
+            )
+            calendars = Calendar.objects.filter(users=member).all()
+            for calendar in calendars:
+                event.calendarID.add(calendar)
+        return Response(None, status=status.HTTP_201_CREATED)   
     
     def delete(self, request):
-        tag = request.GET.get("tag", "")
-        Event.objects.filter(tag = tag).delete()
+        id = request.GET.get("id", "")
+        Event.objects.filter(id = id).delete()
         return Response(None, status=status.HTTP_200_OK)
     
     def patch(self, request):
-        tag = request.GET.get("tag", "")
-        events = Event.objects.filter(tag = tag)
+        id = request.GET.get("id", "")
+        events = Event.objects.filter(id = id)
         for event in events:
             serializer = EventSerializer(event, data=request.data, partial=True) 
             if serializer.is_valid():
@@ -86,37 +98,6 @@ class EventView(APIView):
             else:
                 return Response(None, status=status.HTTP_400_BAD_REQUEST)
         return Response(None, status=status.HTTP_200_OK)
-        
-
-
-class EventsView(APIView):
-    def post(self, request):
-        name = get_user(request).get_short_name()
-        while True:
-            newTag = get_random_string(6, allowed_chars=string.ascii_uppercase + string.digits)
-            if not Event.objects.filter(tag = newTag).exists():
-                break
-        for event in request.data:
-            while True:
-                newID = get_random_string(6, allowed_chars=string.ascii_uppercase + string.digits)
-                if not Event.objects.filter(pk=newID).exists():
-                    break
-            Event.objects.create(
-                calendarId = event["calendarId"],
-                id = newID,
-                title = event["title"],
-                isAllday = event["isAllday"],
-                start = event["start"],
-                end = event["end"],
-                category = event["category"],
-                dueDateClass = event["dueDateClass"],
-                location = event["location"],
-                state = event["state"],
-                isPrivate = event["isPrivate"],
-                tag = newTag,
-                owner = name
-            )
-        return Response(None, status=status.HTTP_201_CREATED)
 
 class UserCreate(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -157,7 +138,8 @@ class ActivateView(APIView):
             user.save()
             createdCalendar = Calendar(
                 calendarID = "",
-                name = "Personal"
+                name = "Personal",
+                isPersonal = True
             )
             createdCalendar.save()
             createdCalendar.users.add(user)
@@ -211,12 +193,20 @@ class ProfileView(APIView):
         login(request, user)
         return Response(None, status=status.HTTP_200_OK)
 
-class AddCalendarView(APIView):
+class CalendarView(APIView):
     def get(self, request):
         user = get_user(request)
-        # calendars = CalendarSerializer(Calendar.objects.filter(users = user))
-        calendars = Calendar.objects.filter(users = user).values_list()
-        return Response(calendars, status=status.HTTP_200_OK)
+        calendars = Calendar.objects.filter(users = user)
+        data = []
+        for calendar in calendars:
+            data.append({
+                "calendarID": calendar.calendarID,
+                "groupName": calendar.name,
+                "isPersonal": calendar.isPersonal,
+                "isAnonymous": calendar.isAnonymous,
+                "journals": calendar.journals.all().values_list()
+            })
+        return Response(data, status=status.HTTP_200_OK)
     def post(self, request):
         user = get_user(request)
         if request.data["choice"] == "join":
@@ -273,5 +263,44 @@ class SessionView(APIView):
     @staticmethod
     def get(request, format=None):
         return JsonResponse({'isAuthenticated': True})
+
+class JournalView(APIView):
+    def get(self, request):
+        data = {}
+        user = get_user(request)
+        calendars = user.calendar_set.all()
+        for calendar in calendars:
+            journals = calendar.journals.all()
+            data[calendar.calendarID] = {}
+            for journal in journals:
+                entries = JournalEntry.objects.filter(journalID=journal.journalID).order_by("date").values()
+                data[calendar.calendarID][journal.journalID] = entries
+        return Response(data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        name = request.data["name"]
+        newJournal = Journal.objects.create(
+            name = name
+        )
+        calendar = Calendar.objects.get(calendarID=request.data["group"])
+        calendar.journals.add(newJournal)
+        return Response({"journalID": newJournal.journalID}, status=status.HTTP_200_OK)
+    
+    def post(self, request, journalID):
+        author = get_user(request).get_short_name()
+        title = request.data["title"]
+        description = request.data["description"]
+        entry = JournalEntry.objects.create(
+            title = title,
+            description = description,
+            journalID = journalID,
+            author = author,
+        )
+        print(entry)
+        data = json.loads(serializers.serialize('json', [entry]))[0]['fields']
+        data['entryID'] = entry.entryID
+        return Response(data, status=status.HTTP_200_OK)
+        
+
 
 

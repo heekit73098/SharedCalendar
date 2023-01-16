@@ -36,6 +36,7 @@ export default function NavBar() {
               <Nav className="me-auto">
                 <Nav.Link href="/profile">Profile</Nav.Link>
                 <Nav.Link href="/calendar">Calendar</Nav.Link>
+                <Nav.Link href="/journal">Journal</Nav.Link>
               </Nav>
               <Nav>
                 <Nav.Link href="/profile">Welcome, {firstName}</Nav.Link>

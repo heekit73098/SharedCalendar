@@ -8,6 +8,8 @@ import AuthService from "../utils/authService";
 import { useNavigate } from "react-router-dom";
 import NavBar from "./NavBar";
 
+import "../assets/Register.css"
+
 export default function Register() {
   const [successful, setSuccessful] = useState(false)
   const [message, setMessage] = useState("")
@@ -73,7 +75,7 @@ export default function Register() {
   return (
     <div className="col-md-12">
       <NavBar />
-      <div className="card card-container" style={{paddingTop:75}}>
+      <div className="register-form">
 
         <Formik
           initialValues={initialValues}
