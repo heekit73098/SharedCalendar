@@ -1,12 +1,11 @@
-import { useEffect, useRef, useState } from "react";
-// import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import { useEffect, useState } from "react";
 import Tabs from 'react-bootstrap/Tabs'
 import Tab from 'react-bootstrap/Tab'
 import ProfileService from '../utils/profileService';
 import NavBar from "./NavBar";
 import JournalLayout from "./JournalLayout";
-import 'react-tabs/style/react-tabs.css';
 import JournalService from "../utils/journalService";
+import { useNavigate } from "react-router-dom";
 
 type Group = {
     id: string,
@@ -24,8 +23,10 @@ type CalendarData = {
   }
 
 export default function Journal() {  
+    const navigate = useNavigate()
     const [groups, setGroups] = useState<Group[]>([])
     const [entries, setEntries] = useState<{ [id: string] : {} }>({})
+    const [loaded, setLoaded] = useState(false)
     useEffect(() => {
         ProfileService.getCalendars().then(res => {
             var groupArray: Group[] = []
@@ -47,10 +48,15 @@ export default function Journal() {
                   }
                 })
                 setGroups(groupArray)
+                JournalService.getEntries().then(res => {
+                  setEntries(res.data)
+                  setLoaded(true)
+                })
               })
-        })
-        JournalService.getEntries().then(res => {
-          setEntries(res.data)
+        }).catch(err => {
+          if (err.response.status === 403) {
+            navigate("/", { state: "Please Login First!" })
+          }
         })
     }, [])
 
@@ -60,9 +66,9 @@ export default function Journal() {
         <div>
             <NavBar />
             <Tabs>
-                {groups.map(group => {
+                {loaded && groups.map(group => {
                     return (
-                        <Tab eventKey={group['id']} title={group['name']} key={group['id']}>
+                        <Tab eventKey={group['id']} title={group['name']} key={group['id']} className="group-tab">
                             <br />
                             <JournalLayout groupID={group['id']} journals={group['journals']} entries={entries[group['id']]} />
                         </Tab>

@@ -12,16 +12,17 @@ import reportWebVitals from './utils/reportWebVitals';
 import '@toast-ui/calendar/toastui-calendar.css';
 import 'tui-date-picker/dist/tui-date-picker.min.css';
 import 'tui-time-picker/dist/tui-time-picker.min.css';
-import 'bootstrap/dist/css/bootstrap-minty.min.css';
+import 'bootstrap/dist/css/bootstrap-yeti.min.css';
 import Home from './components/Home';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
-document.body.style.backgroundColor = "#C1E1C1"
+
+
 
 root.render(
-  // <React.StrictMode>
+  <React.StrictMode>
     <BrowserRouter>
     <Routes>
           <Route path="/" element={<Home />}/>
@@ -32,7 +33,7 @@ root.render(
           <Route path="/journal" element={<Journal />}/>
     </Routes>
     </BrowserRouter>
-  // </React.StrictMode>
+  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

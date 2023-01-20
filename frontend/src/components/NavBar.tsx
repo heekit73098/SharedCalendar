@@ -10,6 +10,7 @@ export default function NavBar() {
     const navigate = useNavigate();
     const [firstName, setFirstName] = useState('');
     const [authenticated, setAuthenticated] = useState(false)
+    const [loaded, setLoaded] = useState(false)
     function logout() {
         AuthService.logout();
         navigate("/");
@@ -19,13 +20,19 @@ export default function NavBar() {
       ProfileService.getProfile().then( res => {
         setFirstName(res.data.first_name)
         setAuthenticated(true)
+        setLoaded(true)
       }).catch((err) => {
         if (err.response.status === 403) {
           setAuthenticated(false)
+          setLoaded(true)
         }
       })
     }, [])
-
+    if (!loaded) {
+      return (
+        <div>Loading...</div>
+      )
+    }
     if (authenticated) {
       return (
         <Navbar sticky="top" collapseOnSelect expand="lg" bg="dark" variant="dark">
@@ -48,14 +55,13 @@ export default function NavBar() {
       );
     } else {
       return (
-        <Navbar fixed="top" collapseOnSelect expand="lg" bg="dark" variant="dark">
+        <Navbar sticky="top" collapseOnSelect expand="lg" bg="dark" variant="dark">
           <Container>
             <Navbar.Brand href="/">Futurum</Navbar.Brand>
             <Navbar.Toggle aria-controls="responsive-navbar-nav" />
             <Navbar.Collapse id="responsive-navbar-nav">
               <Nav>
                 <Nav.Link href="/login">Login</Nav.Link>
-                <Nav.Link href="/register">Register</Nav.Link>
               </Nav>
             </Navbar.Collapse>
           </Container>

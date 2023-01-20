@@ -1,10 +1,15 @@
-import { SetStateAction, useEffect, useState } from 'react';
+import { MouseEvent, SetStateAction, useEffect, useState } from 'react';
 import { EditorState, convertToRaw, convertFromHTML, ContentState } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 import htmlToDraft from 'html-to-draftjs';
-import draftToHtml from 'draftjs-to-html';
-import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css"
+
+import { useNavigate } from 'react-router-dom';
 import JournalService from '../utils/journalService';
+import "../assets/Journal.css"
+import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css"
+import NewJournalEntry from './NewJournalEntry';
 
 const EditorToolbar = {
   options: ["inline", "blockType", "fontSize", "list", "textAlign", "colorPicker", "link", "remove", "history"],
@@ -26,96 +31,88 @@ type Entry = {
   journalID: string,
   date: Date,
   datetimeStr: string,
-  description: string
+  description: string,
+  editable: boolean
 }
 
 export default function JournalEntries({journalID, entries}: {journalID: string, entries: []}) {
-  const [title, setTitle] = useState("")
-  const [editorState, setEditorState] = useState(EditorState.createEmpty())
+  const navigate = useNavigate();
+  const [showPopup, setShowPopup] = useState(false)
   const [journalEntries, setJournalEntries] = useState<Entry[]>([])
 
   useEffect(() => {
     let temp: Entry[] = []
-    entries.forEach(entry => {
-      let tempEntry: Entry = entry
-      let datetime = new Date(entry['date'])
-      tempEntry['datetimeStr'] = datetime.toLocaleTimeString([], {year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'})
-      temp.push(tempEntry)
-    });
+    if (entries) {
+      entries.forEach(entry => {
+        let tempEntry: Entry = entry
+        let datetime = new Date(entry['date'])
+        tempEntry['datetimeStr'] = datetime.toLocaleTimeString([], {year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'})
+        tempEntry['editable'] = false
+        temp.push(tempEntry)
+      });
+    }
     setJournalEntries(temp)
   }, [])
 
-  function onEditorStateChange(editorState: SetStateAction<EditorState>) {
-    setEditorState(editorState)
+  function deleteEvent(entryID: string) {
+    JournalService.deleteEntry(entryID).then(() => 
+      setJournalEntries(journalEntries.filter(entry => entry.entryID != entryID))
+    )
   }
-  function addEntry() {
-    let descriptionHTML = draftToHtml(convertToRaw(editorState.getCurrentContent()))
-    JournalService.addEntry(journalID, title, descriptionHTML).then(res => {
-      let datetime = new Date(res.data['date'])
-      let temp: Entry = {
-        title: title,
-        author: res.data['author'],
-        journalID: res.data['journalID'],
-        entryID: res.data['entryID'],
-        datetimeStr: datetime.toLocaleTimeString([], {year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit'}),
-        date: res.data['date'],
-        description: res.data['description']
-      }
-      setJournalEntries([...journalEntries, temp])
-    })
-    
 
+  function deleteJournal(journalID: string) {
+    JournalService.deleteJournal(journalID).then(() => {
+      navigate(0)
+    })
   }
+
+
   return (
     <div>
-      <div>
-        {journalEntries.map(entry => {
-          const blocksFromHTML =  convertFromHTML(entry['description']);
-          const state = ContentState.createFromBlockArray(
-            blocksFromHTML.contentBlocks,
-            blocksFromHTML.entityMap
-          )
-          const storedState = EditorState.createWithContent(state)
-          return (
-            <div  key={entry['entryID']}>
-              <div className="card">
-                <h4>{entry['title']}</h4>
-                <h6>By: {entry['author']}</h6>
-                <h6>{entry['datetimeStr']}</h6>
-                <Editor toolbarHidden editorState={storedState} readOnly={true} />
+      <Row>
+        <Col sm={6}>
+          <h3 className='journal-text'>Journal Entries</h3>
+          {journalEntries.map(entry => {
+            const blocksFromHTML =  convertFromHTML(entry['description']);
+            const state = ContentState.createFromBlockArray(
+              blocksFromHTML.contentBlocks,
+              blocksFromHTML.entityMap
+            )
+            const storedState = EditorState.createWithContent(state)
+            return (
+              <div  key={entry['entryID']}>
+                <div className="card">
+                  <h5>Title: {entry['title']}</h5>
+                  <h6>By: {entry['author']}</h6>
+                  <h6>{entry['datetimeStr']}</h6>
+                  <button className='delete-button' onClick={() => deleteEvent(entry['entryID'])}>Delete</button>
+                  <br />
+                  
+                  <Editor toolbarHidden editorState={storedState} readOnly={true} wrapperStyle={{
+                    backgroundColor: "#ffffff",
+                    paddingLeft: "2%"
+                  }} />
+                </div>
+                <br />
               </div>
-              <br />
-            </div>
-          )
-        })}
-      </div>
-      <div>
-        <label htmlFor='title'>Title</label>
-        <br />
-        <input type="text" value={title} onChange={e => setTitle(e.target.value)} />
-      </div>
-      <div>
-        <label htmlFor="description">Description</label>
-        <Editor
-          editorState={editorState}
-          wrapperClassName="text-wrapper"
-          editorClassName="text-editor"
-          onEditorStateChange={onEditorStateChange}
-          toolbar={EditorToolbar}
-          wrapperStyle={{
-            border: "1px solid #ffffff",
-            padding: 10,
-            borderRadius: 10
-          }}
-          toolbarStyle={{
-            border: 0,
-            borderBottom: "1px solid #ffffff"
-          }}
-        />
-      </div>
-      <div>
-        <button type="button" onClick={addEntry}>Submit</button>
-      </div>
+            )
+          })}
+        </Col>
+        <Col sm={1}></Col>
+        <Col sm={3}>
+          <h3 className='journal-text'>Panel</h3>
+          <div className="editor-panel">
+            <button type="button" className="btn btn-primary btn-block" onClick={() => setShowPopup(true)}>Add New Entry</button>
+          </div>
+          <div className="editor-panel">
+            <button type="button" className="btn btn-primary btn-block" onClick={() => deleteJournal(journalID)}>Delete Journal</button>
+          </div>
+        </Col>
+      </Row>
+      {
+        showPopup ? 
+        <NewJournalEntry journalID={journalID} journalEntries={journalEntries} setJournalEntries={setJournalEntries} closePopup={() => setShowPopup(false)} /> : null
+    }
     </div>    
   )
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Tooltip } from 'react-tooltip'
 import 'react-tooltip/dist/react-tooltip.css'
@@ -16,6 +16,15 @@ export default function Register() {
   const navigate = useNavigate()
   const popup = "Password should be 8-30 characters long<br />At least one<ul><li>Lowercase Letter</li><li>Uppercase Letter</li><li>Special Character</li><li>Digit</li></ul>"
 
+  useEffect(() => {
+    AuthService.getUser().then( res => navigate("/calendar")
+    ).catch( err => {
+        if (err.response.status === 403) {
+          setSuccessful(false)
+        }
+    })
+  }, [])
+  
   function validationSchema() {
     return Yup.object().shape({
       email: Yup.string()

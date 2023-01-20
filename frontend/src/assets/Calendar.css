@@ -44,8 +44,9 @@ body {
 
 .render-range {
   padding-left: 12px;
-  font-size: 19px;
+  font-size: 30px;
   vertical-align: middle;
+  text-align: center;
 }
 
 /** custom fontawesome */
@@ -58,4 +59,8 @@ body {
 [type="checkbox"]
 {
     vertical-align:text-top;
+}
+
+.container {
+  text-align: center;
 }

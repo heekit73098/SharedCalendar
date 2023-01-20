@@ -1,0 +1,129 @@
+.profile-text {
+    text-align: center;
+    padding:2%
+}
+
+.profile-table {
+    border: none;
+    border-collapse: collapse;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+    max-width: 100%;
+}
+
+.profile-table td {
+    border-left: 1px dashed #000;
+    border-right: 1px dashed #000;
+}
+
+.profile-table tr {
+    border-top: 1px solid #000;
+    border-bottom: 1px solid #000;
+}
+
+.profile-table tr:first-child {
+    border-top: none;
+}
+
+.profile-table tr:last-child {
+    border-bottom: none;
+}
+
+.profile-table td:first-child {
+    border-left: none;
+    font-size: 20px;
+    text-align: center;
+}
+
+.profile-table td:last-child {
+    border-right: none;
+    font-size: 20px;
+    padding-top: 5%;
+    padding-bottom: 5%;
+    padding-left: 2%;
+    padding-right: 2%;
+}
+
+.popup {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    z-index: 2;
+    background-color: rgba(0,0,0, 0.5);
+}
+
+.popup_inner {
+    position: absolute;
+    left: 20%;
+    right: 20%;
+    top: 20%;
+    bottom: 20%;
+    margin: auto;
+    background:  #fafdf3 ;
+    border-radius: 10px;
+    overflow-y: scroll;
+}
+
+.popup-button {
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.group-info-table {
+    border: none;
+    border-collapse: collapse;
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+}
+
+.group-info-table td {
+    border-left: 1px dashed #000;
+    border-right: 1px dashed #000;
+}
+
+.group-info-table tr {
+    border-top: 1px solid #000;
+    border-bottom: 1px solid #000;
+}
+
+.group-info-table tr:first-child {
+    border-top: none;
+}
+
+.group-info-table tr:last-child {
+    border-bottom: none;
+}
+
+.group-info-table td:first-child {
+    border-left: none;
+    font-size: 20px;
+    text-align: center;
+}
+
+.group-info-table td:last-child {
+    border-right: none;
+    font-size: 20px;
+    padding-top: 5%;
+    padding-bottom: 5%;
+    padding-left: 2%;
+    padding-right: 2%;
+}
+
+.group-id-popup {
+    cursor:pointer;
+    color:blue;
+    text-decoration:underline;
+}
+
+.group-id-popup:hover {
+    text-decoration:none;
+    text-shadow: 1px 1px 1px #555;
+}

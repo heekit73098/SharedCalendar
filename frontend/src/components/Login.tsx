@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
@@ -12,7 +12,15 @@ export default function Login() {
   const [redirect, setRedirect] = useState("")
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    AuthService.getUser().then( res => setRedirect("/calendar")
+    ).catch( err => {
+        if (err.response.status === 403) {
+            setRedirect("")
+        }
+    })
+  }, [])
 
   function validationSchema() {
     return Yup.object().shape({
@@ -45,7 +53,7 @@ export default function Login() {
     };
 
     return (
-      <div className="col-md-12">
+      <div>
         <NavBar />
         <div className="login-form">
 
@@ -75,7 +83,7 @@ export default function Login() {
                 />
               </div>
 
-              <div className="form-group">
+              <div className="form-group-button">
                 <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
                   {loading && (
                     <span className="spinner-border spinner-border-sm"></span>
@@ -93,6 +101,10 @@ export default function Login() {
               )}
             </Form>
           </Formik>
+          <div className="nav-register">
+            <span>Need an account? </span>
+            <a href="/register">Sign Up Now!</a>
+          </div>
         </div>
       </div>
     );

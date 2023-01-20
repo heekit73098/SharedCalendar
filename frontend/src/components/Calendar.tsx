@@ -11,6 +11,8 @@ import { useNavigate } from 'react-router-dom';
 import NavBar from './NavBar';
 import ProfileService from '../utils/profileService';
 import { Alert } from 'react-bootstrap';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
 type ViewType = 'month' | 'week' | 'day';
 type CalendarEvent = {
@@ -189,7 +191,6 @@ function CalendarComponent({ view }: { view: ViewType }) {
     array.sort(function (a, b) {
       return a.calendarId.charCodeAt(0) - b.calendarId.charCodeAt(0);
     });
-    console.log(array)
     array = array.filter((event: { calendarId: string; }) => {
       return (filteredCalendars!.map(a => a.id).includes(event.calendarId));
     })
@@ -239,11 +240,9 @@ function CalendarComponent({ view }: { view: ViewType }) {
           retrievedEvents.push(e)
         });
       });
-      console.log(retrievedEvents)
       setEvents(retrievedEvents)
     })
     .catch((err) => {
-      console.log(err)
       if (err.response.status === 403) {
         navigate("/", { state: "Please Login First!" })
       }
@@ -353,14 +352,20 @@ function CalendarComponent({ view }: { view: ViewType }) {
   return (
     <div>
       <NavBar />
-      <h1>Calendar</h1>
+      <Alert show={alert} variant={"danger"} onClose={() => setAlert(false)} dismissible>
+          {message}
+      </Alert>
+      <br />
+      <div className="container">
+        <span className="render-range">{selectedDateRangeText}</span>
+      </div>
       <div>
         <select onChange={onChangeSelect} value={selectedView}>
-          {viewModeOptions.map((option, index) => (
-            <option value={option.value} key={index}>
-              {option.title}
-            </option>
-          ))}
+            {viewModeOptions.map((option, index) => (
+              <option value={option.value} key={index}>
+                {option.title}
+              </option>
+            ))}
         </select>
         <span>
           <button
@@ -388,55 +393,61 @@ function CalendarComponent({ view }: { view: ViewType }) {
             Next
           </button>
         </span>
-        <span className="render-range">{selectedDateRangeText}</span>
       </div>
-      <table>
-        <tbody>
-          {calendars?.map(item => {
-                      return (
-                          <tr key={item.id}>
-                            <td><label>{item.name}</label></td>
-                            <td><input type="checkbox" id={item.id} value={item.id} defaultChecked={true} onChange={filterCalendars} /></td>
-                          </tr>
-                      );
-                      })}
-        </tbody>
-      </table>
+      <br />
+      <Row>
+        <Col sm={1}>
+          <h5>Groups:</h5>
+          <table>
+            <tbody>
+              {calendars?.map(item => {
+                return (
+                    <tr key={item.id}>
+                      <td><label>{item.name}</label></td>
+                      <td><input type="checkbox" id={item.id} value={item.id} defaultChecked={true} onChange={filterCalendars} /></td>
+                    </tr>
+                );
+                })}
+            </tbody>
+          </table>
+        </Col>
+        <Col>
+          <Calendar
+            height="750px"
+            calendars={filteredCalendars}
+            month={{ startDayOfWeek: 0 }}
+            events={filteredEvents}
+            template={{
+              milestone(event) {
+                return `<span style="color: #fff; background-color: ${event.backgroundColor};">${event.title}</span>`;
+              },
+              allday(event) {
+                return `[All day] ${event.title}`;
+              },
+            }}
+            theme={theme}
+            useDetailPopup={true}
+            useFormPopup={true}
+            view={selectedView}
+            week={{
+              eventView: true,
+              taskView: false,
+            }}
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            ref={calendarRef}
+            onAfterRenderEvent={onAfterRenderEvent}
+            onBeforeDeleteEvent={onBeforeDeleteEvent}
+            onClickDayname={onClickDayName}
+            onClickEvent={onClickEvent}
+            onBeforeUpdateEvent={onBeforeUpdateEvent}
+            onBeforeCreateEvent={onBeforeCreateEvent}
+          />
+        </Col>
+      </Row>
       
-      <Calendar
-        height="750px"
-        calendars={filteredCalendars}
-        month={{ startDayOfWeek: 0 }}
-        events={filteredEvents}
-        template={{
-          milestone(event) {
-            return `<span style="color: #fff; background-color: ${event.backgroundColor};">${event.title}</span>`;
-          },
-          allday(event) {
-            return `[All day] ${event.title}`;
-          },
-        }}
-        theme={theme}
-        useDetailPopup={true}
-        useFormPopup={true}
-        view={selectedView}
-        week={{
-          eventView: true,
-          taskView: false,
-        }}
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        ref={calendarRef}
-        onAfterRenderEvent={onAfterRenderEvent}
-        onBeforeDeleteEvent={onBeforeDeleteEvent}
-        onClickDayname={onClickDayName}
-        onClickEvent={onClickEvent}
-        onBeforeUpdateEvent={onBeforeUpdateEvent}
-        onBeforeCreateEvent={onBeforeCreateEvent}
-      />
-      <Alert show={alert} variant={"danger"} onClose={() => setAlert(false)} dismissible>
-          {message}
-      </Alert>
+      
+      
     </div>
   );
 }

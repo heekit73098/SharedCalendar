@@ -32,5 +32,5 @@ urlpatterns = [
     path('api/calendarConfig/', views.CalendarView.as_view()),
     path('activate/<str:uidb64>/<str:token>/', views.ActivateView.as_view(), name='activate'),
     path('api/journal/', views.JournalView.as_view()),
-    path('api/journal/<str:journalID>/', views.JournalView.as_view()),
+    path('api/journal/<str:type>/<str:id>/', views.JournalView.as_view()),
 ]

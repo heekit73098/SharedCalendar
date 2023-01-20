@@ -12,3 +12,12 @@ code {
     monospace;
   
 }
+
+#root {
+  background-color: #B5FFFC;
+  background-image: linear-gradient(0deg, #B5FFFC 0%, #FFDEE9 100%);
+  height: 100%;
+  width: 100%;
+  min-height: 100vh;
+  overflow: hidden;
+}

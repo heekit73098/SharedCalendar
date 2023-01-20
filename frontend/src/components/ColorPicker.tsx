@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import '../assets/ColorPicker.css';
 import { CirclePicker } from 'react-color'
-import reactCSS from 'reactcss'
-import { string } from 'yup';
 
 function ColorPicker({ calID, originalColor, selected }: {calID:string, originalColor:string, selected:Function}) {
     const [displayColorPicker, setDisplayColorPicker] = useState(false)
@@ -35,7 +33,7 @@ function ColorPicker({ calID, originalColor, selected }: {calID:string, original
                 width: '28px',
                 height: '28px',
                 borderRadius: '50%',
-                background: color
+                background: color,
             }} />
         </div>
         { displayColorPicker ? <div className='popover'>

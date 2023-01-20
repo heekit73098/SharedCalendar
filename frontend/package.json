@@ -17,6 +17,7 @@
     "draft-js": "^0.11.7",
     "draftjs-to-html": "^0.9.1",
     "enzyme": "^3.11.0",
+    "firebase": "^9.16.0",
     "formik": "^2.2.9",
     "history": "^5.3.0",
     "html-to-draftjs": "^1.5.0",

@@ -3,6 +3,7 @@ import { Alert } from "react-bootstrap";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import AuthService from "../utils/authService";
 import NavBar from "./NavBar";
+import "../assets/Home.css"
 
 export default function Home() {
     const [authenticated, setAuthenticated] = useState(false)
@@ -26,12 +27,12 @@ export default function Home() {
         return <Navigate to={"/calendar"}/>
     } else {
         return (
-            <div className="home-body">
+            <div>
                 <NavBar />
-                <div style={{paddingTop:75}}>
+                <div className="home-body">
                     <h1>Welcome to Futurum </h1>
                 </div>
-                <Alert style={{position:"fixed", bottom:0}} show={alert} variant={"danger"} onClose={() => setAlert(false)} dismissible>
+                <Alert className="home-alert" show={alert} variant={"danger"} onClose={() => setAlert(false)} dismissible>
                     {message}
                 </Alert>
             </div>

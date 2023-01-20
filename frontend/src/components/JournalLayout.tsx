@@ -10,11 +10,13 @@ function JournalLayout({groupID, journals, entries}: {groupID:string, journals: 
   const [newJournalName, setJournalName] = useState("")
   const [journalNames, setJournalNames] = useState<string[][]>([])
   const [journalEntries, setJournalEntries] = useState<{ [id: string] : [] }>({})
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
     setJournalNames(journals)
     JournalService.getEntries()
     setJournalEntries(entries)
+    setLoaded(true)
   }, [])
 
   function addJournal() {
@@ -24,12 +26,12 @@ function JournalLayout({groupID, journals, entries}: {groupID:string, journals: 
   }
   
   return (
-    <Tab.Container id="left-tabs-example" defaultActiveKey="first">
+    <Tab.Container id="left-tabs" defaultActiveKey="add">
       <Row>
-        <Col sm={3}>
+        <Col sm={2}>
           <Nav variant="pills" className="flex-column">
             {
-              journalNames.map(journal => {
+              loaded && journalNames.map(journal => {
                 return(
                   <Nav.Item key={journal[0]}>
                     <Nav.Link eventKey={journal[0]}>{journal[1]}</Nav.Link>
@@ -42,6 +44,7 @@ function JournalLayout({groupID, journals, entries}: {groupID:string, journals: 
             </Nav.Item>
           </Nav>
         </Col>
+        <Col sm={1}></Col>
         <Col sm={9}>
           <Tab.Content>
             {
@@ -54,8 +57,10 @@ function JournalLayout({groupID, journals, entries}: {groupID:string, journals: 
               })
             }            
             <Tab.Pane eventKey="add">
-              <input placeholder="Enter Journal Name" onChange={(e) => {setJournalName(e.target.value)}}></input>
-              <button type="button" onClick={addJournal}>Submit</button>
+              <div className="add-journal">
+                <input placeholder="Enter Journal Name" onChange={(e) => {setJournalName(e.target.value)}}></input>
+                <button type="button" onClick={addJournal} className="btn btn-primary btn-block">Submit</button>
+              </div>
             </Tab.Pane>
           </Tab.Content>
         </Col>

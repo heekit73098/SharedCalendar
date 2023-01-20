@@ -39,7 +39,7 @@ tokenGenerator = PasswordResetTokenGenerator()
 defaultColor = "#0000FF"
 
 class EventView(APIView):
-    
+    http_method_names = ['get', 'post', 'delete', 'patch']
     def get(self, request):
         user = get_user(request)
         serializer_class = EventSerializer
@@ -157,6 +157,7 @@ class ActivateView(APIView):
 class LoginView(APIView):
     # This view should be accessible also for unauthenticated users.
     permission_classes = (permissions.AllowAny,)
+    http_method_names = ['post']
     def post(self, request, format=None):
         serializer = LoginSerializer(data=self.request.data,
             context={ 'request': self.request })
@@ -173,11 +174,13 @@ class LoginView(APIView):
         
 
 class LogoutView(APIView):
+    http_method_names = ['post']
     def post(self, request, format=None):
         logout(request)
         return Response(None, status=status.HTTP_204_NO_CONTENT)
 
 class ProfileView(APIView):
+    http_method_names = ['get', 'post']
     def get(self, request):
         user = get_user(request)
         return JsonResponse({
@@ -194,23 +197,33 @@ class ProfileView(APIView):
         return Response(None, status=status.HTTP_200_OK)
 
 class CalendarView(APIView):
+    http_method_names = ['get', 'post']
     def get(self, request):
         user = get_user(request)
         calendars = Calendar.objects.filter(users = user)
         data = []
         for calendar in calendars:
+            user_list = []
+            for groupUser in calendar.users.all():
+                user_list.append(groupUser.get_short_name())
+                    
             data.append({
                 "calendarID": calendar.calendarID,
                 "groupName": calendar.name,
                 "isPersonal": calendar.isPersonal,
                 "isAnonymous": calendar.isAnonymous,
-                "journals": calendar.journals.all().values_list()
+                "journals": calendar.journals.all().values_list(),
+                "users": user_list
             })
         return Response(data, status=status.HTTP_200_OK)
     def post(self, request):
         user = get_user(request)
         if request.data["choice"] == "join":
             if Calendar.objects.filter(calendarID = request.data["field"]).exists():
+                if Calendar.objects.get(calendarID = request.data["field"]).isPersonal:
+                    return Response({"Error": "Personal Groups cannot be shared!"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+                if user in Calendar.objects.get(calendarID = request.data["field"]).users.all():
+                    return Response({"Error": "Group has been added!"}, status=status.HTTP_406_NOT_ACCEPTABLE)
                 Calendar.objects.get(pk=request.data["field"]).users.add(user)
                 CalendarColor.objects.create(
                     calendarID=Calendar.objects.get(pk=request.data["field"]).calendarID,
@@ -221,9 +234,15 @@ class CalendarView(APIView):
             else:
                 return Response({"Error": "Invalid ID"}, status=status.HTTP_406_NOT_ACCEPTABLE)
         else:
+            if request.data["choice"] != "create" and request.data["choice"] != "create-anon":
+                return Response({"Error": "Invalid Choice"}, status=status.HTTP_406_NOT_ACCEPTABLE)
+            isAnonymous = False
+            if request.data["choice"] == "create-anon":
+                isAnonymous = True
             createdCalendar = Calendar(
                 calendarID = "",
-                name = request.data["field"]
+                name = request.data["field"],
+                isAnonymous = isAnonymous
             )
             createdCalendar.save()
             createdID = createdCalendar.calendarID
@@ -236,6 +255,7 @@ class CalendarView(APIView):
             return Response({'calendarID': createdID}, status=status.HTTP_201_CREATED)
 
 class CalendarColorView(APIView):
+    http_method_names = ['get', 'post']
     def get(self, request):
         username = get_user(request).get_username()
         queryset = CalendarColor.objects.filter(user = username)
@@ -260,11 +280,13 @@ class CalendarColorView(APIView):
         return Response(None, status=status.HTTP_200_OK)
 
 class SessionView(APIView):
+    http_method_names = ['get']
     @staticmethod
     def get(request, format=None):
         return JsonResponse({'isAuthenticated': True})
 
 class JournalView(APIView):
+    http_method_names = ['get', 'post', 'delete', 'patch']
     def get(self, request):
         data = {}
         user = get_user(request)
@@ -273,33 +295,43 @@ class JournalView(APIView):
             journals = calendar.journals.all()
             data[calendar.calendarID] = {}
             for journal in journals:
-                entries = JournalEntry.objects.filter(journalID=journal.journalID).order_by("date").values()
+                entries = JournalEntry.objects.filter(journalID=journal.journalID).order_by("-date").values()
                 data[calendar.calendarID][journal.journalID] = entries
         return Response(data, status=status.HTTP_200_OK)
 
-    def post(self, request):
-        name = request.data["name"]
-        newJournal = Journal.objects.create(
-            name = name
-        )
-        calendar = Calendar.objects.get(calendarID=request.data["group"])
-        calendar.journals.add(newJournal)
-        return Response({"journalID": newJournal.journalID}, status=status.HTTP_200_OK)
-    
-    def post(self, request, journalID):
-        author = get_user(request).get_short_name()
-        title = request.data["title"]
-        description = request.data["description"]
-        entry = JournalEntry.objects.create(
-            title = title,
-            description = description,
-            journalID = journalID,
-            author = author,
-        )
-        print(entry)
-        data = json.loads(serializers.serialize('json', [entry]))[0]['fields']
-        data['entryID'] = entry.entryID
-        return Response(data, status=status.HTTP_200_OK)
+    def post(self, request, type, id):
+        if type == 'e':
+            author = get_user(request).get_short_name()
+            title = request.data["title"]
+            description = request.data["description"]
+            entry = JournalEntry.objects.create(
+                title = title,
+                description = description,
+                journalID = id,
+                author = author,
+            )
+            data = json.loads(serializers.serialize('json', [entry]))[0]['fields']
+            data['entryID'] = entry.entryID
+            return Response(data, status=status.HTTP_200_OK)
+        elif type == 'j':
+            name = request.data["name"]
+            newJournal = Journal.objects.create(
+                name = name
+            )
+            calendar = Calendar.objects.get(calendarID=request.data["group"])
+            calendar.journals.add(newJournal)
+            return Response({"journalID": newJournal.journalID}, status=status.HTTP_200_OK)
+
+    def delete(self, request, type, id):
+        if type == 'e':
+            JournalEntry.objects.get(entryID=id).delete()
+            return Response(None, status=status.HTTP_200_OK)
+        elif type == 'j':
+            journal = Journal.objects.get(journalID=id)
+            JournalEntry.objects.filter(journalID=id).delete()
+            Calendar.objects.get(journals = journal).journals.remove(journal)
+            journal.delete()
+            return Response(None, status=status.HTTP_200_OK)
         
 
 
