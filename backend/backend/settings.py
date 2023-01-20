@@ -93,8 +93,17 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'qwerty73098$sharedCalendar',
+        'USER': 'qwerty73098',
+        'PASSWORD': 'b@ngh33k1t73098',
+        'HOST': 'qwerty73098.mysql.pythonanywhere-services.com',
+        'OPTIONS':{
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+        },
+        'TEST': {
+          'NAME': '<your username>$test_<your database name>',
+        }
     }
 }
 
