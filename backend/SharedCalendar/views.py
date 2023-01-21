@@ -16,6 +16,7 @@ from django.core.mail import EmailMessage
 from django.core import serializers
 import string
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.shortcuts import render
 import threading
 
 class EmailThread(threading.Thread):
@@ -37,6 +38,9 @@ def sendEmail(mail_subject, message, to_email):
 
 tokenGenerator = PasswordResetTokenGenerator()  
 defaultColor = "#0000FF"
+
+def render_react(request):
+    return render(request, "index.html")
 
 class EventView(APIView):
     http_method_names = ['get', 'post', 'delete', 'patch']

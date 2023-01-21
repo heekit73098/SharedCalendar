@@ -1,9 +1,8 @@
-import { MouseEvent, SetStateAction, useEffect, useState } from 'react';
-import { EditorState, convertToRaw, convertFromHTML, ContentState } from 'draft-js';
+import { useEffect, useState } from 'react';
+import { EditorState, convertFromHTML, ContentState } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import htmlToDraft from 'html-to-draftjs';
 
 import { useNavigate } from 'react-router-dom';
 import JournalService from '../utils/journalService';

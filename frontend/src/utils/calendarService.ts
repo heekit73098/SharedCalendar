@@ -1,7 +1,6 @@
 import axios from "axios";
 
 const API_URL = "https://qwerty73098.pythonanywhere.com/api/calendar/"
-const DEV_API_URL = "http://localhost:8000/api/"
 
 type CalendarEvent = {
     calendarID: string; 
@@ -27,19 +26,19 @@ const config = {
 class CalendarService {
     
     refreshList() {
-        return (axios.get(DEV_API_URL, config))
+        return (axios.get(API_URL, config))
     }
 
     deleteEvent(id: string) {
-        return (axios.delete(DEV_API_URL + '?id=' + id, config))
+        return (axios.delete(API_URL + '?id=' + id, config))
     }
 
     createEvent(event: CalendarEvent) {
-        return (axios.post(DEV_API_URL, event, config))
+        return (axios.post(API_URL, event, config))
     }
 
     updateEvent(id: string, changes: {}) {
-        return (axios.patch(DEV_API_URL + '?id=' + id, changes, config))
+        return (axios.patch(API_URL + '?id=' + id, changes, config))
     }
 }
 

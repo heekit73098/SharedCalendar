@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, re_path
 from rest_framework import routers
 from SharedCalendar import views
 
@@ -33,4 +33,6 @@ urlpatterns = [
     path('activate/<str:uidb64>/<str:token>/', views.ActivateView.as_view(), name='activate'),
     path('api/journal/', views.JournalView.as_view()),
     path('api/journal/<str:type>/<str:id>/', views.JournalView.as_view()),
+    re_path(r"^$", views.render_react),
+    re_path(r"^(?:.*)/?$", views.render_react),
 ]
