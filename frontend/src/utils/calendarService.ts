@@ -19,7 +19,7 @@ type CalendarEvent = {
 
 const config = {
     withCredentials:true,
-    xsrfHeaderName:"X-CSRFTOKEN", 
+    xsrfHeaderName:"X-CSRF-TOKEN", 
     xsrfCookieName: "csrftoken" 
 }
 

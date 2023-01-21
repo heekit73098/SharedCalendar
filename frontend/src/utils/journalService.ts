@@ -4,7 +4,7 @@ const API_URL = "https://qwerty73098.pythonanywhere.com/api/journal/"
 
 const config = {
     withCredentials:true,
-    xsrfHeaderName:"X-CSRFTOKEN", 
+    xsrfHeaderName:"X-CSRF-TOKEN", 
     xsrfCookieName: "csrftoken" 
 }
 
