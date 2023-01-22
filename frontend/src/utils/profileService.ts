@@ -1,11 +1,5 @@
 import axios from "axios";
-
-const API_URL = "https://qwerty73098.pythonanywhere.com/api/"
-const config = {
-    withCredentials:true,
-    xsrfHeaderName:"X-CSRF-TOKEN", 
-    xsrfCookieName: "csrftoken" 
-}
+import { config, API_URL } from "./utils"
 
 class ProfileService {
     getProfile() {

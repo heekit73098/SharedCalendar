@@ -1,4 +1,5 @@
 import "../assets/Profile.css"
+import { IoClose } from "react-icons/io5";
 
 export default function GroupPopup({groupID, groupName, type, users, closePopup}: {groupID:string, groupName:string, type:string, users:string[], closePopup: Function}) {
     return (
@@ -17,7 +18,7 @@ export default function GroupPopup({groupID, groupName, type, users, closePopup}
                         })}</ul></td></tr>
                     </tbody>
                 </table>
-                <button className="popup-button" onClick={() => closePopup()}>Close</button>
+                <button className="popup-button" onClick={() => closePopup()}><IoClose /></button>
             </div>
             
         </div>

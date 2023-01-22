@@ -1,26 +1,7 @@
-import { TZDate } from '@toast-ui/calendar';
-
-export function clone(date: TZDate): TZDate {
-  return new TZDate(date);
-}
-
-export function addHours(d: TZDate, step: number) {
-  const date = clone(d);
-  date.setHours(d.getHours() + step);
-
-  return date;
-}
-
-export function addDate(d: TZDate, step: number) {
-  const date = clone(d);
-  date.setDate(d.getDate() + step);
-
-  return date;
-}
-
-export function subtractDate(d: TZDate, steps: number) {
-  const date = clone(d);
-  date.setDate(d.getDate() - steps);
-
-  return date;
+export const API_URL = "https://qwerty73098.pythonanywhere.com/api/"
+// export const API_URL = "http://localhost:8000/api/"
+export const config = {
+  withCredentials:true,
+  xsrfHeaderName:"X-CSRFToken", 
+  xsrfCookieName: "csrftoken" 
 }

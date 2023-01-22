@@ -1,11 +1,6 @@
 import axios from "axios";
+import { config, API_URL } from "./utils"
 
-const API_URL = "https://qwerty73098.pythonanywhere.com/api/"
-const config = {
-  withCredentials:true,
-  xsrfHeaderName:"X-CSRF-TOKEN", 
-  xsrfCookieName: "csrftoken" 
-}
 
 class AuthService {
   login(username: string, password: string) {
@@ -13,7 +8,7 @@ class AuthService {
       .post(API_URL + "login/", {
         username,
         password
-      })
+      }, config)
   }
 
   logout() {

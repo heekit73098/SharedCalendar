@@ -13,6 +13,7 @@ import ProfileService from '../utils/profileService';
 import { Alert } from 'react-bootstrap';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import { IoChevronBackCircle, IoChevronForwardCircle, IoToday } from "react-icons/io5";
 
 type ViewType = 'month' | 'week' | 'day';
 type CalendarEvent = {
@@ -225,13 +226,13 @@ function CalendarComponent({ view }: { view: ViewType }) {
           const e: CalendarEvent = {
             calendarId: calendarID,
             id: event.id,
-            title: calendarID[0] === "C" ? "Busy" : event.title,
+            title: calendarID[0] === "B" ? "Busy" : event.title,
             isAllday: event.isAllday,
             start: new Date(event.start),
             end: new Date(event.end),
             category: event.category,
             dueDateClass: event.dueDateClass,
-            location: event.location,
+            location: calendarID[0] === "B" ? "Unknown" :event.location,
             state: event.state,
             isPrivate: event.isPrivate,
             tag: event.tag,
@@ -370,27 +371,27 @@ function CalendarComponent({ view }: { view: ViewType }) {
         <span>
           <button
             type="button"
-            className="btn btn-default btn-sm move-today"
+            className="move-today"
             data-action="move-today"
             onClick={onClickNavi}
           >
-            Today
+            <IoToday size={28}/>
           </button>
           <button
             type="button"
-            className="btn btn-default btn-sm move-day"
+            className="move-day"
             data-action="move-prev"
             onClick={onClickNavi}
           >
-            Prev
+            <IoChevronBackCircle size={28}/>
           </button>
           <button
             type="button"
-            className="btn btn-default btn-sm move-day"
+            className="move-day"
             data-action="move-next"
             onClick={onClickNavi}
           >
-            Next
+            <IoChevronForwardCircle size={28}/>
           </button>
         </span>
       </div>
@@ -403,7 +404,7 @@ function CalendarComponent({ view }: { view: ViewType }) {
               {calendars?.map(item => {
                 return (
                     <tr key={item.id}>
-                      <td><label>{item.name}</label></td>
+                      <td><label className="checkbox-label" htmlFor={item.id}>{item.name}</label></td>
                       <td><input type="checkbox" id={item.id} value={item.id} defaultChecked={true} onChange={filterCalendars} /></td>
                     </tr>
                 );

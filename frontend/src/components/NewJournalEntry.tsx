@@ -4,6 +4,7 @@ import { Editor } from 'react-draft-wysiwyg';
 import draftToHtml from 'draftjs-to-html';
 import JournalService from '../utils/journalService';
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css"
+import { IoClose } from "react-icons/io5";
 
 type Entry = {
     title: string,
@@ -38,7 +39,9 @@ export default function NewJournalEntry({journalID, journalEntries, setJournalEn
             date: res.data['date'],
             description: res.data['description']
           }
-          setJournalEntries([...journalEntries, temp])
+          let tempArray = journalEntries
+          tempArray.unshift(temp)
+          setJournalEntries(tempArray)
           closePopup()
         })
     }
@@ -74,7 +77,7 @@ export default function NewJournalEntry({journalID, journalEntries, setJournalEn
                 <div className="popup-text">
                     <button type="button" className="btn btn-primary btn-block" onClick={addEntry}>Submit</button>
                 </div>
-                <button className="popup-button" onClick={() => closePopup()}>Close</button>
+                <button className="popup-button" onClick={() => closePopup()}><IoClose /></button>
             </div>
         </div>
     )

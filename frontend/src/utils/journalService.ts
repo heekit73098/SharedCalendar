@@ -1,41 +1,34 @@
 import axios from "axios";
-
-const API_URL = "https://qwerty73098.pythonanywhere.com/api/journal/"
-
-const config = {
-    withCredentials:true,
-    xsrfHeaderName:"X-CSRF-TOKEN", 
-    xsrfCookieName: "csrftoken" 
-}
+import { config, API_URL } from "./utils"
 
 class JournalService {
     addJournal(name:string, group:string) {
         return (
-            axios.post(API_URL + "j/add/", {name, group}, config)
+            axios.post(API_URL + "journal/j/add/", {name, group}, config)
         )
     }
 
     addEntry(journalID:string, title:string, description:string) {
         return (
-            axios.post(API_URL + "e/" + journalID + "/", {title, description}, config)
+            axios.post(API_URL + "journal/e/" + journalID + "/", {title, description}, config)
         )
     }
 
     getEntries() {
         return (
-            axios.get(API_URL, config)
+            axios.get(API_URL + "journal/", config)
         )
     }
 
     deleteEntry(entryID: string) {
         return (
-            axios.delete(API_URL + "e/" + entryID + "/", config)
+            axios.delete(API_URL + "journal/e/" + entryID + "/", config)
         )
     }
 
     deleteJournal(journalID: string) {
         return (
-            axios.delete(API_URL + "j/" + journalID + "/", config)
+            axios.delete(API_URL + "journal/j/" + journalID + "/", config)
         )
     }
 }
