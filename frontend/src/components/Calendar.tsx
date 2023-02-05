@@ -89,6 +89,7 @@ function CalendarComponent({ view }: { view: ViewType }) {
     switch (viewName) {
       case 'month': {
         let d = new Date()
+        d.setDate(1)
         d.setMonth(month)
         d.setFullYear(year)
         dateRangeText = d.toLocaleDateString('en-SG', {
@@ -112,7 +113,7 @@ function CalendarComponent({ view }: { view: ViewType }) {
           year: "numeric"
         })
 
-        let endDate = new Date()
+        let endDate = new Date(startDate)
         endDate.setDate(startDate.getDate() + 6)
         let endDateText = endDate.toLocaleDateString("en-SG", {
           day: "numeric",
@@ -133,7 +134,6 @@ function CalendarComponent({ view }: { view: ViewType }) {
           year: "numeric"
         })
     }
-
     setSelectedDateRangeText(dateRangeText);
   }, [getCalInstance]);
 
@@ -266,21 +266,21 @@ function CalendarComponent({ view }: { view: ViewType }) {
     }
   }
 
-  const onAfterRenderEvent: ExternalEventTypes['afterRenderEvent'] = (res) => {
-    console.group('onAfterRenderEvent');
-    console.log('Event Info : ', res.title);
-    console.groupEnd();
-  };
+  // const onAfterRenderEvent: ExternalEventTypes['afterRenderEvent'] = (res) => {
+  //   console.group('onAfterRenderEvent');
+  //   console.log('Event Info : ', res.title);
+  //   console.groupEnd();
+  // };
 
   const onChangeSelect = (ev: ChangeEvent<HTMLSelectElement>) => {
     setSelectedView(ev.target.value as ViewType);
   };
 
-  const onClickDayName: ExternalEventTypes['clickDayName'] = (res) => {
-    console.group('onClickDayName');
-    console.log('Date : ', res.date);
-    console.groupEnd();
-  };
+  // const onClickDayName: ExternalEventTypes['clickDayName'] = (res) => {
+  //   console.group('onClickDayName');
+  //   console.log('Date : ', res.date);
+  //   console.groupEnd();
+  // };
 
   const onClickNavi = (ev: MouseEvent<HTMLButtonElement>) => {
     if ((ev.target as HTMLButtonElement).tagName === 'BUTTON') {
@@ -291,12 +291,12 @@ function CalendarComponent({ view }: { view: ViewType }) {
     }
   };
 
-  const onClickEvent: ExternalEventTypes['clickEvent'] = (res) => {
-    console.group('onClickEvent');
-    console.log('MouseEvent : ', res.nativeEvent);
-    console.log('Event Info : ', res.event);
-    console.groupEnd();
-  };
+  // const onClickEvent: ExternalEventTypes['clickEvent'] = (res) => {
+  //   console.group('onClickEvent');
+  //   console.log('MouseEvent : ', res.nativeEvent);
+  //   console.log('Event Info : ', res.event);
+  //   console.groupEnd();
+  // };
 
   const onBeforeDeleteEvent: ExternalEventTypes['beforeDeleteEvent'] = (res) => {
     console.group('onBeforeDeleteEvent');
@@ -437,10 +437,10 @@ function CalendarComponent({ view }: { view: ViewType }) {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             ref={calendarRef}
-            onAfterRenderEvent={onAfterRenderEvent}
+            // onAfterRenderEvent={onAfterRenderEvent}
             onBeforeDeleteEvent={onBeforeDeleteEvent}
-            onClickDayname={onClickDayName}
-            onClickEvent={onClickEvent}
+            // onClickDayname={onClickDayName}
+            // onClickEvent={onClickEvent}
             onBeforeUpdateEvent={onBeforeUpdateEvent}
             onBeforeCreateEvent={onBeforeCreateEvent}
           />

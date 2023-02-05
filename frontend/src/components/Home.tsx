@@ -38,17 +38,14 @@ export default function Home() {
                         <div className="each-slide-effect">
                             <div id="slide1" >
                             </div>
-                            <p><h5>Add events to your calendar to share with whoever you want!</h5></p>
                         </div>
                         <div className="each-slide-effect">
                             <div id="slide2" >
                             </div>
-                            <p><h5>When shared, your family/friends can see your schedule. Use these information to plan your activities!</h5></p>
                         </div>
                         <div className="each-slide-effect">
                             <div id="slide3" >
                             </div>
-                            <p><h5>You can also create journal entries to share with the people in your group!</h5></p>
                         </div>
                     </Slide>
                 </div>
