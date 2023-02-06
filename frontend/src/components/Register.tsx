@@ -3,6 +3,7 @@ import { Formik, Field, Form, ErrorMessage } from "formik";
 import { Tooltip } from 'react-tooltip'
 import 'react-tooltip/dist/react-tooltip.css'
 import * as Yup from "yup";
+import logo from '../assets/logo-no-background.png'
 
 import AuthService from "../utils/authService";
 import { useNavigate } from "react-router-dom";
@@ -85,7 +86,7 @@ export default function Register() {
     <div className="col-md-12">
       <NavBar />
       <div className="register-form">
-
+        <img src={logo} alt="Futurum" width="200px" height = "50px"/>
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}

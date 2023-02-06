@@ -57,8 +57,8 @@ export default class Constants {
     ];
 
     static readonly GET_CALENDAR_BODY = [
-        ["J3TDLR","Personal"],
-        ["2DYKZP","TestCal"]
+        {"calendarID":"J3TDLR","groupName":"Personal"},
+        {"calendarID":"2DYKZP","groupName":"TestCal"}
     ];
 
     static readonly GET_PROFILE_BODY = {"email": "test@test.com", "full_name": "John Tan"}

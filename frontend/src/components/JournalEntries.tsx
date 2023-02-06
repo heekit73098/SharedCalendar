@@ -1,15 +1,15 @@
-import { MouseEvent, SetStateAction, useEffect, useState } from 'react';
-import { EditorState, convertToRaw, convertFromHTML, ContentState } from 'draft-js';
+import { useEffect, useState } from 'react';
+import { EditorState, convertFromHTML, ContentState } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import htmlToDraft from 'html-to-draftjs';
 
 import { useNavigate } from 'react-router-dom';
 import JournalService from '../utils/journalService';
 import "../assets/Journal.css"
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css"
 import NewJournalEntry from './NewJournalEntry';
+import { IoTrash } from "react-icons/io5";
 
 const EditorToolbar = {
   options: ["inline", "blockType", "fontSize", "list", "textAlign", "colorPicker", "link", "remove", "history"],
@@ -85,7 +85,7 @@ export default function JournalEntries({journalID, entries}: {journalID: string,
                   <h5>Title: {entry['title']}</h5>
                   <h6>By: {entry['author']}</h6>
                   <h6>{entry['datetimeStr']}</h6>
-                  <button className='delete-button' onClick={() => deleteEvent(entry['entryID'])}>Delete</button>
+                  <button className='delete-button' onClick={() => deleteEvent(entry['entryID'])}><IoTrash /></button>
                   <br />
                   
                   <Editor toolbarHidden editorState={storedState} readOnly={true} wrapperStyle={{

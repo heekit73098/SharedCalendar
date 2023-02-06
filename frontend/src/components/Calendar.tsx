@@ -13,6 +13,7 @@ import ProfileService from '../utils/profileService';
 import { Alert } from 'react-bootstrap';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import { IoChevronBackCircle, IoChevronForwardCircle, IoToday } from "react-icons/io5";
 
 type ViewType = 'month' | 'week' | 'day';
 type CalendarEvent = {
@@ -88,6 +89,7 @@ function CalendarComponent({ view }: { view: ViewType }) {
     switch (viewName) {
       case 'month': {
         let d = new Date()
+        d.setDate(1)
         d.setMonth(month)
         d.setFullYear(year)
         dateRangeText = d.toLocaleDateString('en-SG', {
@@ -111,7 +113,7 @@ function CalendarComponent({ view }: { view: ViewType }) {
           year: "numeric"
         })
 
-        let endDate = new Date()
+        let endDate = new Date(startDate)
         endDate.setDate(startDate.getDate() + 6)
         let endDateText = endDate.toLocaleDateString("en-SG", {
           day: "numeric",
@@ -132,7 +134,6 @@ function CalendarComponent({ view }: { view: ViewType }) {
           year: "numeric"
         })
     }
-
     setSelectedDateRangeText(dateRangeText);
   }, [getCalInstance]);
 
@@ -225,13 +226,13 @@ function CalendarComponent({ view }: { view: ViewType }) {
           const e: CalendarEvent = {
             calendarId: calendarID,
             id: event.id,
-            title: calendarID[0] === "C" ? "Busy" : event.title,
+            title: calendarID[0] === "B" ? "Busy" : event.title,
             isAllday: event.isAllday,
             start: new Date(event.start),
             end: new Date(event.end),
             category: event.category,
             dueDateClass: event.dueDateClass,
-            location: event.location,
+            location: calendarID[0] === "B" ? "Unknown" :event.location,
             state: event.state,
             isPrivate: event.isPrivate,
             tag: event.tag,
@@ -265,21 +266,21 @@ function CalendarComponent({ view }: { view: ViewType }) {
     }
   }
 
-  const onAfterRenderEvent: ExternalEventTypes['afterRenderEvent'] = (res) => {
-    console.group('onAfterRenderEvent');
-    console.log('Event Info : ', res.title);
-    console.groupEnd();
-  };
+  // const onAfterRenderEvent: ExternalEventTypes['afterRenderEvent'] = (res) => {
+  //   console.group('onAfterRenderEvent');
+  //   console.log('Event Info : ', res.title);
+  //   console.groupEnd();
+  // };
 
   const onChangeSelect = (ev: ChangeEvent<HTMLSelectElement>) => {
     setSelectedView(ev.target.value as ViewType);
   };
 
-  const onClickDayName: ExternalEventTypes['clickDayName'] = (res) => {
-    console.group('onClickDayName');
-    console.log('Date : ', res.date);
-    console.groupEnd();
-  };
+  // const onClickDayName: ExternalEventTypes['clickDayName'] = (res) => {
+  //   console.group('onClickDayName');
+  //   console.log('Date : ', res.date);
+  //   console.groupEnd();
+  // };
 
   const onClickNavi = (ev: MouseEvent<HTMLButtonElement>) => {
     if ((ev.target as HTMLButtonElement).tagName === 'BUTTON') {
@@ -290,12 +291,12 @@ function CalendarComponent({ view }: { view: ViewType }) {
     }
   };
 
-  const onClickEvent: ExternalEventTypes['clickEvent'] = (res) => {
-    console.group('onClickEvent');
-    console.log('MouseEvent : ', res.nativeEvent);
-    console.log('Event Info : ', res.event);
-    console.groupEnd();
-  };
+  // const onClickEvent: ExternalEventTypes['clickEvent'] = (res) => {
+  //   console.group('onClickEvent');
+  //   console.log('MouseEvent : ', res.nativeEvent);
+  //   console.log('Event Info : ', res.event);
+  //   console.groupEnd();
+  // };
 
   const onBeforeDeleteEvent: ExternalEventTypes['beforeDeleteEvent'] = (res) => {
     console.group('onBeforeDeleteEvent');
@@ -370,27 +371,27 @@ function CalendarComponent({ view }: { view: ViewType }) {
         <span>
           <button
             type="button"
-            className="btn btn-default btn-sm move-today"
+            className="move-today"
             data-action="move-today"
             onClick={onClickNavi}
           >
-            Today
+            <IoToday size={28}/>
           </button>
           <button
             type="button"
-            className="btn btn-default btn-sm move-day"
+            className="move-day"
             data-action="move-prev"
             onClick={onClickNavi}
           >
-            Prev
+            <IoChevronBackCircle size={28}/>
           </button>
           <button
             type="button"
-            className="btn btn-default btn-sm move-day"
+            className="move-day"
             data-action="move-next"
             onClick={onClickNavi}
           >
-            Next
+            <IoChevronForwardCircle size={28}/>
           </button>
         </span>
       </div>
@@ -403,7 +404,7 @@ function CalendarComponent({ view }: { view: ViewType }) {
               {calendars?.map(item => {
                 return (
                     <tr key={item.id}>
-                      <td><label>{item.name}</label></td>
+                      <td><label className="checkbox-label" htmlFor={item.id}>{item.name}</label></td>
                       <td><input type="checkbox" id={item.id} value={item.id} defaultChecked={true} onChange={filterCalendars} /></td>
                     </tr>
                 );
@@ -436,10 +437,10 @@ function CalendarComponent({ view }: { view: ViewType }) {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             ref={calendarRef}
-            onAfterRenderEvent={onAfterRenderEvent}
+            // onAfterRenderEvent={onAfterRenderEvent}
             onBeforeDeleteEvent={onBeforeDeleteEvent}
-            onClickDayname={onClickDayName}
-            onClickEvent={onClickEvent}
+            // onClickDayname={onClickDayName}
+            // onClickEvent={onClickEvent}
             onBeforeUpdateEvent={onBeforeUpdateEvent}
             onBeforeCreateEvent={onBeforeCreateEvent}
           />

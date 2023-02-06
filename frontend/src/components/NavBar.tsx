@@ -5,6 +5,7 @@ import AuthService from "../utils/authService";
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import ProfileService from '../utils/profileService';
+import logo from '../assets/logo-no-background.png'
 
 export default function NavBar() {
     const navigate = useNavigate();
@@ -37,7 +38,7 @@ export default function NavBar() {
       return (
         <Navbar sticky="top" collapseOnSelect expand="lg" bg="dark" variant="dark">
           <Container>
-            <Navbar.Brand href="/">Futurum</Navbar.Brand>
+            <Navbar.Brand href="/"><img src={logo} alt="Futurum" width="200px" height = "50px"/></Navbar.Brand>
             <Navbar.Toggle aria-controls="responsive-navbar-nav" />
             <Navbar.Collapse id="responsive-navbar-nav">
               <Nav className="me-auto">
@@ -57,11 +58,12 @@ export default function NavBar() {
       return (
         <Navbar sticky="top" collapseOnSelect expand="lg" bg="dark" variant="dark">
           <Container>
-            <Navbar.Brand href="/">Futurum</Navbar.Brand>
+            <Navbar.Brand href="/"><img src={logo} alt="Futurum" width="200px" height = "50px"/></Navbar.Brand>
             <Navbar.Toggle aria-controls="responsive-navbar-nav" />
             <Navbar.Collapse id="responsive-navbar-nav">
               <Nav>
                 <Nav.Link href="/login">Login</Nav.Link>
+                <Nav.Link href="/features">Features</Nav.Link>
               </Nav>
             </Navbar.Collapse>
           </Container>

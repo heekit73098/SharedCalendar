@@ -33,13 +33,13 @@ body {
   outline: none;
 }
 
-.move-today {
-  padding: 0 16px;
-  line-height: 30px;
+svg {
+  pointer-events: none;
 }
 
-.move-day {
-  padding: 8px;
+.move-day,.move-today {
+  border: none;
+  background-color: transparent;
 }
 
 .render-range {
@@ -56,10 +56,10 @@ body {
   margin-right: 2px;
 }
 
-[type="checkbox"]
-{
-    vertical-align:text-top;
+.checkbox-label {
+  cursor: pointer;
 }
+
 
 .container {
   text-align: center;

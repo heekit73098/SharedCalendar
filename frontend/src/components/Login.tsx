@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { Formik, Field, Form, ErrorMessage } from "formik";
+import logo from '../assets/logo-no-background.png'
 import * as Yup from "yup";
 
 import AuthService from "../utils/authService";
@@ -9,6 +10,7 @@ import NavBar from "./NavBar";
 import "../assets/Login.css"
 
 export default function Login() {
+  const navigate = useNavigate()
   const [redirect, setRedirect] = useState("")
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")
@@ -35,14 +37,15 @@ export default function Login() {
     setLoading(true)
 
     AuthService.login(username, password).then(
-      async (res) => {
-        setRedirect("/calendar")
-      },
+      (res) => { 
+        navigate('/calendar')
+      }
+    ).catch(
       error => {
         setLoading(false)
         setMessage(error.response.data.message)
-      }
-    )}
+      })
+  }
 
   if (redirect !== "") {
     return <Navigate to={redirect} />
@@ -56,7 +59,7 @@ export default function Login() {
       <div>
         <NavBar />
         <div className="login-form">
-
+          <img src={logo} alt="Futurum" width="200px" height = "50px"/>
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}

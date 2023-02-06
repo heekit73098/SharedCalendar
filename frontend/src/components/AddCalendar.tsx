@@ -1,4 +1,4 @@
-import { Formik, ErrorMessage, Field, Form } from "formik";
+import { Formik, Field, Form } from "formik";
 import { useEffect, useState } from "react";
 import ProfileService from "../utils/profileService";
 import ColorPicker from "./ColorPicker";

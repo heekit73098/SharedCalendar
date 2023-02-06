@@ -20,11 +20,11 @@ test('renders base layout of profile', async () => {
 
   const renderer = await act(async () => render(<Profile />))
   const emailElement = await waitFor(() =>
-    renderer.getByText("Email:")
+    renderer.getByText("Email")
   );
   expect(emailElement).toBeInTheDocument();
   const nameElement = await waitFor(() =>
-    renderer.getByText("Name:")
+    renderer.getByText("Full Name")
   );
   expect(nameElement).toBeInTheDocument();
 });

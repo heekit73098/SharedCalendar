@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import '../assets/ColorPicker.css';
 import { CirclePicker } from 'react-color'
 

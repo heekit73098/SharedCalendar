@@ -16,6 +16,7 @@ from django.core.mail import EmailMessage
 from django.core import serializers
 import string
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.shortcuts import render
 import threading
 
 class EmailThread(threading.Thread):
@@ -38,6 +39,9 @@ def sendEmail(mail_subject, message, to_email):
 tokenGenerator = PasswordResetTokenGenerator()  
 defaultColor = "#0000FF"
 
+def render_react(request):
+    return render(request, "index.html")
+
 class EventView(APIView):
     http_method_names = ['get', 'post', 'delete', 'patch']
     def get(self, request):
@@ -52,6 +56,7 @@ class EventView(APIView):
     def post(self, request):
         targetCalendar = Calendar.objects.get(calendarID=request.data["calendarID"])
         members = targetCalendar.users.all()
+        request.data._mutable = True
         while True:
             newTag = get_random_string(6, allowed_chars=string.ascii_uppercase + string.digits)
             if not Event.objects.filter(tag = newTag).exists():
@@ -85,7 +90,8 @@ class EventView(APIView):
     
     def delete(self, request):
         id = request.GET.get("id", "")
-        Event.objects.filter(id = id).delete()
+        if Event.objects.filter(id=id).exists():
+            Event.objects.filter(id = id).delete()
         return Response(None, status=status.HTTP_200_OK)
     
     def patch(self, request):
@@ -153,7 +159,6 @@ class ActivateView(APIView):
             return HttpResponse("Wrong token")
 
 
-
 class LoginView(APIView):
     # This view should be accessible also for unauthenticated users.
     permission_classes = (permissions.AllowAny,)
@@ -170,8 +175,7 @@ class LoginView(APIView):
                 user = User.objects.get(username=request.data['username'])
                 if not user.is_active:
                     return Response({"message": "Please activate your account first!"}, status=status.HTTP_403_FORBIDDEN)
-            return Response({"message": "Invalid Username/Password"}, status=status.HTTP_403_FORBIDDEN)
-        
+            return Response({"message": "Invalid Username/Password"}, status=status.HTTP_403_FORBIDDEN)     
 
 class LogoutView(APIView):
     http_method_names = ['post']
@@ -312,7 +316,7 @@ class JournalView(APIView):
             )
             data = json.loads(serializers.serialize('json', [entry]))[0]['fields']
             data['entryID'] = entry.entryID
-            return Response(data, status=status.HTTP_200_OK)
+            return Response(data, status=status.HTTP_201_CREATED)
         elif type == 'j':
             name = request.data["name"]
             newJournal = Journal.objects.create(
@@ -320,7 +324,7 @@ class JournalView(APIView):
             )
             calendar = Calendar.objects.get(calendarID=request.data["group"])
             calendar.journals.add(newJournal)
-            return Response({"journalID": newJournal.journalID}, status=status.HTTP_200_OK)
+            return Response({"journalID": newJournal.journalID}, status=status.HTTP_201_CREATED)
 
     def delete(self, request, type, id):
         if type == 'e':

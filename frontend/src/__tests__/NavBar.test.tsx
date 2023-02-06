@@ -15,11 +15,6 @@ test('renders login layout', async () => {
     const axiosMock = new MockAdaptor(axios);
     axiosMock.onGet('http://localhost:8000/api/profile/').reply(200, Constants.GET_PROFILE_BODY);
     const renderer = await act(async () => render(<NavBar />))
-    const appNameElement = await waitFor(() =>
-        renderer.getByText("Futurum")
-    );
-    expect(appNameElement).toBeInTheDocument();
-
     const profileElement = await waitFor(() =>
         renderer.getByText("Profile")
     );
