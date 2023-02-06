@@ -1,5 +1,5 @@
 import { act, prettyDOM, render, waitFor } from '@testing-library/react';
-import Login from '../components/Login';
+import NavBar from '../components/NavBar';
 import '@testing-library/jest-dom'
 import MockAdaptor from 'axios-mock-adapter'
 import Constants from '../assets/testResBody';
@@ -14,14 +14,19 @@ jest.mock('react-router-dom', () => ({
 test('renders login layout', async () => {
     const axiosMock = new MockAdaptor(axios);
     axiosMock.onGet('http://localhost:8000/api/profile/').reply(200, Constants.GET_PROFILE_BODY);
-    const renderer = await act(async () => render(<Login />))
-    const usernameElement = await waitFor(() =>
-        renderer.getByText("Email")
+    const renderer = await act(async () => render(<NavBar />))
+    const profileElement = await waitFor(() =>
+        renderer.getByText("Profile")
     );
-    expect(usernameElement).toBeInTheDocument();
+    expect(profileElement).toBeInTheDocument();
 
-    const passwordElement = await waitFor(() =>
-        renderer.getByText("Password")
+    const calendarElement = await waitFor(() =>
+        renderer.getByText("Calendar")
     );
-    expect(passwordElement).toBeInTheDocument();
+    expect(calendarElement).toBeInTheDocument();
+
+    const logoutElement = await waitFor(() =>
+        renderer.getByText("Logout")
+    );
+    expect(logoutElement).toBeInTheDocument();
 })
