@@ -45,7 +45,7 @@ def render_react(request):
 class EventView(APIView):
     http_method_names = ['get', 'post', 'delete', 'patch']
     def get(self, request):
-        user = get_user(request)
+        user = request.user
         serializer_class = EventSerializer
         calendars = user.calendar_set.values_list('calendarID')
         compiledData = []
@@ -56,7 +56,7 @@ class EventView(APIView):
     def post(self, request):
         targetCalendar = Calendar.objects.get(calendarID=request.data["calendarID"])
         members = targetCalendar.users.all()
-        request.data._mutable = True
+        # request.data._mutable = True
         while True:
             newTag = get_random_string(6, allowed_chars=string.ascii_uppercase + string.digits)
             if not Event.objects.filter(tag = newTag).exists():
@@ -186,14 +186,14 @@ class LogoutView(APIView):
 class ProfileView(APIView):
     http_method_names = ['get', 'post']
     def get(self, request):
-        user = get_user(request)
+        user = request.user
         return JsonResponse({
             'email': user.get_username(),
             'full_name': user.get_full_name(),
             'first_name': user.get_short_name()
         }, status=status.HTTP_200_OK)
     def post(self, request):
-        user = get_user(request)
+        user = request.user
         password = request.data["password"]
         user.set_password(password)
         user.save()
@@ -203,7 +203,7 @@ class ProfileView(APIView):
 class CalendarView(APIView):
     http_method_names = ['get', 'post']
     def get(self, request):
-        user = get_user(request)
+        user = request.user
         calendars = Calendar.objects.filter(users = user)
         data = []
         for calendar in calendars:
@@ -221,7 +221,7 @@ class CalendarView(APIView):
             })
         return Response(data, status=status.HTTP_200_OK)
     def post(self, request):
-        user = get_user(request)
+        user = request.user
         if request.data["choice"] == "join":
             if Calendar.objects.filter(calendarID = request.data["field"]).exists():
                 if Calendar.objects.get(calendarID = request.data["field"]).isPersonal:
@@ -261,13 +261,13 @@ class CalendarView(APIView):
 class CalendarColorView(APIView):
     http_method_names = ['get', 'post']
     def get(self, request):
-        username = get_user(request).get_username()
+        username = request.user.get_username()
         queryset = CalendarColor.objects.filter(user = username)
         data = CalendarColorSerializer(queryset, many=True).data
         return Response(data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        username = get_user(request).get_username()
+        username = request.user.get_username()
         for calendar in request.data:
             try:
                 CalendarColor.objects.update_or_create(
@@ -293,7 +293,7 @@ class JournalView(APIView):
     http_method_names = ['get', 'post', 'delete', 'patch']
     def get(self, request):
         data = {}
-        user = get_user(request)
+        user = request.user
         calendars = user.calendar_set.all()
         for calendar in calendars:
             journals = calendar.journals.all()
@@ -305,7 +305,7 @@ class JournalView(APIView):
 
     def post(self, request, type, id):
         if type == 'e':
-            author = get_user(request).get_short_name()
+            author = request.user.get_short_name()
             title = request.data["title"]
             description = request.data["description"]
             entry = JournalEntry.objects.create(

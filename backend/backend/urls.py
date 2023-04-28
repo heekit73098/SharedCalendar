@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, re_path
 from rest_framework import routers
 from SharedCalendar import views
+from rest_framework.authtoken import views as v
 
 router = routers.DefaultRouter()
 
@@ -33,6 +34,7 @@ urlpatterns = [
     path('activate/<str:uidb64>/<str:token>/', views.ActivateView.as_view(), name='activate'),
     path('api/journal/', views.JournalView.as_view(), name="journal"),
     path('api/journal/<str:type>/<str:id>/', views.JournalView.as_view(), name="journalAction"),
+    path('api/authToken/', v.obtain_auth_token),
     re_path(r"^$", views.render_react),
     re_path(r"^(?:.*)/?$", views.render_react),
 ]
